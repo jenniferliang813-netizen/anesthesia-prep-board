@@ -81,4 +81,4 @@
 | `麻醉備物溝通看板.html` | 主程式（單檔，雙擊即可開） |
 | `index.html` | GitHub Pages 入口（自動跳轉到主程式） |
 | `anesthesia_prep_board_claude_handoff.md` | 開發規格交班文件 |
-| `蛙蛙設計.html` | 早期 prototype（已保留作對照） |
+| `archive/蛙蛙設計.html` | 早期 prototype（封存，作對照用） |
