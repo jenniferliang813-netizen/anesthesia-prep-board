@@ -74,6 +74,15 @@
 
     .empty-tip { text-align: center; color: #889aae; margin-top: 40px; font-size: 20px; padding: 50px 20px; background: white; border-radius: 12px; border: 1px dashed var(--line); }
 
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(30,58,95,0.55); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: white; border-radius: 12px; padding: 20px; width: 100%; max-width: 420px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+    .modal h3 { font-size: 20px; color: var(--ink); margin-bottom: 14px; }
+    .modal .room-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+    .modal .room-grid button { min-width: 76px; min-height: 50px; padding: 10px 16px; border: 1.5px solid var(--line); background: white; border-radius: 8px; font-weight: 700; font-size: 18px; cursor: pointer; color: var(--ink); }
+    .modal .room-grid button.current { border-color: var(--ink); background: var(--ink); color: white; }
+    .modal .close { width: 100%; padding: 12px; background: #8a99a8; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; min-height: 48px; font-size: 16px; }
+
     .full-link { display: inline-block; margin-top: 12px; font-size: 14px; color: var(--ink-soft); text-decoration: none; padding: 6px 12px; border: 1px solid var(--line); border-radius: 6px; }
     .full-link:hover { background: white; }
   </style>
@@ -94,6 +103,14 @@
   <div id="board-container"></div>
 
   <a class="full-link" href="../">→ 麻醉醫師完整版（新增 / 編輯 case）</a>
+
+  <div class="modal-overlay" id="room-change-modal">
+    <div class="modal">
+      <h3>跳房：選擇新房間</h3>
+      <div class="room-grid" id="room-change-grid"></div>
+      <button class="close" id="room-change-close">取消</button>
+    </div>
+  </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
@@ -149,6 +166,47 @@ function cycleStatus(id) {
   const ni = (STATUS_ORDER.indexOf(cur) + 1) % STATUS_ORDER.length;
   setStatusLocal(id, STATUS_ORDER[ni]);
 }
+
+let pendingRoomChangeId = null;
+function openRoomChange(id) {
+  pendingRoomChangeId = id;
+  const p = currentPatients.find(x => x.id === id);
+  const grid = document.getElementById('room-change-grid');
+  grid.innerHTML = '';
+  // 給所有班別的房間都列出來（護理師可能需要看不同班別的房間）
+  const allRooms = new Set();
+  Object.values(ROOM_GROUPS).forEach(g => g.rooms.forEach(r => allRooms.add(r)));
+  if (p && p.originalRoom) allRooms.add(p.originalRoom);
+  if (p && p.currentRoom) allRooms.add(p.currentRoom);
+  const rooms = Array.from(allRooms).sort((a,b) => Number(a) - Number(b));
+  rooms.forEach(r => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = 'R' + r;
+    if (p && r === p.currentRoom) btn.classList.add('current');
+    btn.onclick = () => doRoomChange(r);
+    grid.appendChild(btn);
+  });
+  document.getElementById('room-change-modal').classList.add('show');
+}
+function closeRoomChange() {
+  pendingRoomChangeId = null;
+  document.getElementById('room-change-modal').classList.remove('show');
+}
+function doRoomChange(newRoom) {
+  if (pendingRoomChangeId == null) return;
+  const idx = currentPatients.findIndex(p => p.id === pendingRoomChangeId);
+  if (idx >= 0) {
+    currentPatients[idx] = Object.assign({}, currentPatients[idx], { currentRoom: newRoom });
+    cloudWriteCase(currentPatients[idx]);
+  }
+  closeRoomChange();
+  renderBoard();
+}
+document.getElementById('room-change-close').addEventListener('click', closeRoomChange);
+document.getElementById('room-change-modal').addEventListener('click', (e) => {
+  if (e.target.id === 'room-change-modal') closeRoomChange();
+});
 
 function updateCloudStatus(online) {
   const el = document.getElementById('cloud-status');
@@ -357,6 +415,11 @@ function renderCase(p) {
     back.onclick = () => setStatusLocal(p.id, '手術中');
     actions.appendChild(back);
   }
+  const jump = document.createElement('button');
+  jump.type = 'button';
+  jump.textContent = '🔀 跳房';
+  jump.onclick = () => openRoomChange(p.id);
+  actions.appendChild(jump);
   card.appendChild(actions);
 
   return card;
