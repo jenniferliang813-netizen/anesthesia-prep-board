@@ -66,6 +66,12 @@
 
     .memo-show { font-size: 16px; color: var(--ink-soft); font-style: italic; padding: 6px 0; word-break: break-word; }
 
+    .case-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; padding-top: 10px; border-top: 1px solid var(--line-soft); }
+    .case-actions button { font-size: 16px; padding: 10px 18px; border: 1.5px solid var(--line); background: white; color: var(--ink); border-radius: 8px; cursor: pointer; font-weight: 700; min-height: 48px; }
+    .case-actions button.primary { color: white; background: var(--ink-soft); border-color: var(--ink-soft); }
+    .case-actions button.ok { color: white; background: var(--ok); border-color: var(--ok); }
+    .case-actions button.muted { color: var(--ink-2); }
+
     .empty-tip { text-align: center; color: #889aae; margin-top: 40px; font-size: 20px; padding: 50px 20px; background: white; border-radius: 12px; border: 1px dashed var(--line); }
 
     .full-link { display: inline-block; margin-top: 12px; font-size: 14px; color: var(--ink-soft); text-decoration: none; padding: 6px 12px; border: 1px solid var(--line); border-radius: 6px; }
@@ -76,7 +82,7 @@
   <div class="header">
     <h1>彰化秀傳麻醉備物看板</h1>
     <div class="sub">護理師檢視（即時同步）</div>
-    <div class="role">🩺 護理師專用 · 唯讀模式</div>
+    <div class="role">👩‍⚕️ 護理師檢視 · 可標記手術狀態</div>
   </div>
 
   <div class="top-row">
@@ -91,7 +97,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
-import { getDatabase, ref, onValue, remove } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-database.js";
+import { getDatabase, ref, onValue, remove, set } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAE86UeO3tLo6JCT7v_W7jwMnvftg0EwIA",
@@ -119,6 +125,29 @@ const expandedData = new Set();
 function todayStr() {
   const d = new Date();
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+const STATUS_ORDER = ['待手術','手術中','已完成'];
+
+async function cloudWriteCase(p) {
+  try { await set(ref(fbDb, 'cases/' + p.id), p); }
+  catch(e) { console.warn('cloud write fail', e); alert('⚠ 雲端寫入失敗，請檢查網路'); }
+}
+
+function setStatusLocal(id, newStatus) {
+  const idx = currentPatients.findIndex(p => p.id === id);
+  if (idx < 0) return;
+  currentPatients[idx] = Object.assign({}, currentPatients[idx], { status: newStatus });
+  cloudWriteCase(currentPatients[idx]);
+  renderBoard();
+}
+
+function cycleStatus(id) {
+  const p = currentPatients.find(x => x.id === id);
+  if (!p) return;
+  const cur = p.status || '待手術';
+  const ni = (STATUS_ORDER.indexOf(cur) + 1) % STATUS_ORDER.length;
+  setStatusLocal(id, STATUS_ORDER[ni]);
 }
 
 function updateCloudStatus(online) {
@@ -206,9 +235,14 @@ function renderCase(p) {
   const head = document.createElement('div');
   head.className = 'case-head';
   const statusKey = p.status === '手術中' ? 'current' : (p.status === '已完成' ? 'done' : 'wait');
-  const badge = document.createElement('span');
+  const badge = document.createElement('button');
+  badge.type = 'button';
   badge.className = 'badge ' + statusKey;
   badge.textContent = p.status || '待手術';
+  badge.style.cursor = 'pointer';
+  badge.style.border = 'none';
+  badge.title = '點擊切換狀態：待 → 中 → 完成 → 待';
+  badge.onclick = () => cycleStatus(p.id);
   head.appendChild(badge);
 
   const headline = document.createElement('div');
@@ -292,6 +326,38 @@ function renderCase(p) {
     m.textContent = '✍ ' + p.memo;
     card.appendChild(m);
   }
+
+  const actions = document.createElement('div');
+  actions.className = 'case-actions';
+  if (p.status === '待手術' || !p.status) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'primary';
+    b.textContent = '▶ 進入手術';
+    b.onclick = () => setStatusLocal(p.id, '手術中');
+    actions.appendChild(b);
+  } else if (p.status === '手術中') {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'ok';
+    b.textContent = '✓ 已完成手術';
+    b.onclick = () => setStatusLocal(p.id, '已完成');
+    actions.appendChild(b);
+    const back = document.createElement('button');
+    back.type = 'button';
+    back.className = 'muted';
+    back.textContent = '↺ 回待手術';
+    back.onclick = () => setStatusLocal(p.id, '待手術');
+    actions.appendChild(back);
+  } else if (p.status === '已完成') {
+    const back = document.createElement('button');
+    back.type = 'button';
+    back.className = 'muted';
+    back.textContent = '↺ 回手術中';
+    back.onclick = () => setStatusLocal(p.id, '手術中');
+    actions.appendChild(back);
+  }
+  card.appendChild(actions);
 
   return card;
 }
