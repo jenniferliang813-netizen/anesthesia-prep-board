@@ -10,9 +10,14 @@
 
 ## 🚀 試玩
 
-線上版（GitHub Pages，手機 / 平板 / 醫院電腦皆可開）：
+兩個版本（資料**即時雲端同步**，任何裝置寫入立刻推到所有看板）：
 
-👉 **<https://jenniferliang813-netizen.github.io/anesthesia-prep-board/>**
+| 角色 | 用途 | 連結 |
+|---|---|---|
+| 🩺 麻醉醫師 | 新增 case + 看板（完整版） | <https://jenniferliang813-netizen.github.io/anesthesia-prep-board/> |
+| 👩‍⚕️ 麻醉護理師 | 只看備物需求（唯讀、大字體） | <https://jenniferliang813-netizen.github.io/anesthesia-prep-board/board/> |
+
+兩個連結讀同一份 Firebase Realtime Database，所以麻醫在他的手機/平板輸入後，護理師在自己的裝置打開就直接看到。
 
 或下載 [`麻醉備物溝通看板.html`](麻醉備物溝通看板.html) 雙擊在瀏覽器打開即可，不需安裝任何東西。
 
@@ -44,11 +49,14 @@
 ## 🔒 資安設計
 
 - **不輸入病人姓名、病歷號、身分證、完整 lab / HIS data**
-- 不串接 HIS，純前端
-- 所有資料存在瀏覽器 localStorage，**每日 23:59 自動清除**
+- 不串接 HIS
+- 資料同步透過 Firebase Realtime Database（asia-southeast1 / 新加坡），**每日 23:59 自動清除雲端與所有裝置**
 - 隔天打開若日期不對，也會自動清除前一天資料
-- 不會傳到任何伺服器；換瀏覽器 / 換裝置看不到別人輸入的內容
+- 載入時若發現雲端有過期資料，會即時刪除
 - 備註欄限制 80 字，並標註「請勿輸入姓名、病歷號或完整病歷內容」
+- 所有輸入以 `textContent` 顯示，無 innerHTML 注入風險
+
+**⚠️ Firebase 安全提醒**：目前 Database 在 30 天測試模式（open access）。任何人拿到網址都能讀寫雲端資料。對「OR 內部小圈圈備物溝通」場景 OK，但要意識到這個風險。30 天後 Firebase 會自動鎖；要正式長期使用需改成 production rules（建議加 magic link auth）。
 
 ## 📝 第一版限制（不做）
 
@@ -70,15 +78,16 @@
 ## 🛠 技術筆記
 
 - 純單檔 HTML + 原生 JS，無框架、無 build step
-- 資料持久化：localStorage
-- 不引入任何外部 CDN
+- 資料持久化：Firebase Realtime Database（雲端 + localStorage 離線快取）
+- 唯一外部 CDN：`gstatic.com/firebasejs/12.14.0`
 - 所有 user 輸入皆以 `textContent` 顯示，無 innerHTML 注入風險
 
 ## 📁 檔案說明
 
 | 檔名 | 用途 |
 |---|---|
-| `麻醉備物溝通看板.html` | 主程式（單檔，雙擊即可開） |
+| `麻醉備物溝通看板.html` | 主程式（麻醫完整版，單檔可雙擊開） |
 | `index.html` | GitHub Pages 入口（自動跳轉到主程式） |
+| `board/index.html` | 護理師唯讀看板分頁（大字體、即時同步） |
 | `anesthesia_prep_board_claude_handoff.md` | 開發規格交班文件 |
 | `archive/蛙蛙設計.html` | 早期 prototype（封存，作對照用） |
