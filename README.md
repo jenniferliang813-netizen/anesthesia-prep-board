@@ -12,12 +12,12 @@
 
 兩個版本（資料**即時雲端同步**，任何裝置寫入立刻推到所有看板）：
 
-| 角色 | 用途 | 連結 |
-|---|---|---|
-| 🩺 麻醉醫師 | 新增 case + 看板（完整版） | <https://jenniferliang813-netizen.github.io/anesthesia-prep-board/> |
-| 👩‍⚕️ 麻醉護理師 | 只看備物需求（唯讀、大字體） | <https://jenniferliang813-netizen.github.io/anesthesia-prep-board/board/> |
+| 角色 | 用途 | 主要網址（Netlify，醫院內網可用） | 備用網址（GitHub Pages） |
+|---|---|---|---|
+| 🩺 麻醉醫師 | 新增 case + 看板 | <https://anesthesia-prep-board.netlify.app/> | <https://jenniferliang813-netizen.github.io/anesthesia-prep-board/> |
+| 👩‍⚕️ 麻醉護理師 | 看備物 + 改狀態 / 跳房 | <https://anesthesia-prep-board.netlify.app/board/> | <https://jenniferliang813-netizen.github.io/anesthesia-prep-board/board/> |
 
-兩個連結讀同一份 Firebase Realtime Database，所以麻醫在他的手機/平板輸入後，護理師在自己的裝置打開就直接看到。
+兩個版本讀同一份 Firebase Realtime Database，所以麻醫在他的手機/平板輸入後，護理師在自己的裝置打開就直接看到。彰化秀傳內網封 `github.io`，所以**主力使用 Netlify 網址**；GitHub Pages 留作家用備援。
 
 或下載 [`麻醉備物溝通看板.html`](麻醉備物溝通看板.html) 雙擊在瀏覽器打開即可，不需安裝任何東西。
 

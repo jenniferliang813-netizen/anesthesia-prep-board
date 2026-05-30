@@ -12,3 +12,4 @@
   from = "/"
   to = "/麻醉備物溝通看板.html"
   status = 200
+  force = true
