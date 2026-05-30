@@ -446,9 +446,14 @@ function renderBoard() {
   }
   const TURN_SORT = ['第1台','第2台','第3台','第4台','急診插入'];
   const turnKey = t => { const i = TURN_SORT.indexOf(t); return i === -1 ? 99 : i; };
+  // 狀態優先：手術中 → 待手術 → 已完成
+  const STATUS_SORT = { '手術中': 0, '待手術': 1, '已完成': 2 };
+  const statusKey = s => (s in STATUS_SORT) ? STATUS_SORT[s] : 1;
   activeRooms.forEach(roomNum => {
     const cases = currentPatients.filter(p => p.currentRoom === roomNum);
     cases.sort((a,b) => {
+      const sa = statusKey(a.status), sb = statusKey(b.status);
+      if (sa !== sb) return sa - sb;
       const ka = turnKey(a.turn), kb = turnKey(b.turn);
       if (ka !== kb) return ka - kb;
       return (a.createdAt || a.id) - (b.createdAt || b.id);

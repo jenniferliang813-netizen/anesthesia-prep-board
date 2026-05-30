@@ -68,19 +68,6 @@
     .prep-card.nested { margin-left: 24px; border-left: 3px solid var(--ink-soft); position: relative; }
     .prep-card.nested::before { content: '↳ NB 配套'; position: absolute; top: -10px; left: 12px; background: var(--bg); padding: 0 6px; font-size: 12px; color: var(--ink-soft); font-weight: 600; }
 
-    .voice-card { background: #fdf6e3; border: 1.5px solid #e0c47a; border-radius: 10px; padding: 12px; margin-bottom: 8px; }
-    .voice-warn { font-size: 13px; color: #8b6b1f; background: #fff8e1; padding: 6px 10px; border-radius: 6px; margin-bottom: 10px; line-height: 1.5; }
-    .voice-btn { width: 100%; min-height: 52px; background: #3b6fa0; color: white; border: none; border-radius: 10px; font-size: 17px; font-weight: 700; cursor: pointer; margin-bottom: 8px; }
-    .voice-btn.recording { background: #c43a31; animation: voicePulse 1.2s ease-in-out infinite; }
-    @keyframes voicePulse { 0%,100% { box-shadow: 0 0 0 0 rgba(196,58,49,0.5); } 50% { box-shadow: 0 0 0 10px rgba(196,58,49,0); } }
-    .voice-status { font-size: 13px; color: var(--ink-2); margin-bottom: 6px; font-weight: 600; min-height: 18px; }
-    .voice-text { width: 100%; min-height: 70px; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 8px; font-size: 16px; background: white; color: var(--ink); resize: vertical; font-family: inherit; line-height: 1.5; }
-    .voice-text:focus { border-color: var(--ink-soft); outline: none; }
-    .voice-actions { display: flex; gap: 8px; margin-top: 8px; }
-    .voice-apply { flex: 1; min-height: 44px; background: var(--ok); color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; }
-    .voice-clear { min-height: 44px; padding: 0 18px; background: white; color: var(--ink); border: 1.5px solid var(--line); border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; }
-    .voice-hint { font-size: 12px; color: var(--ink-2); margin-top: 8px; line-height: 1.5; }
-    .voice-unsupported { background: #fdecea; color: var(--warn); padding: 10px 12px; border-radius: 8px; font-size: 14px; margin-bottom: 8px; border-left: 4px solid var(--warn); }
     .prep-toggle { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 600; cursor: pointer; min-height: 36px; color: var(--ink); }
     .prep-toggle input { width: 22px; height: 22px; accent-color: var(--ink-soft); cursor: pointer; }
     .prep-body { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); }
@@ -423,20 +410,6 @@ function initInputPage() {
 
     <div class="section-title">麻醉方式</div>
     <div class="btn-group" id="field-anes"></div>
-
-    <div class="section-title">🎙 語音備物（選用）</div>
-    <div id="voice-unsupported" class="voice-unsupported" style="display:none;">⚠️ 此瀏覽器不支援語音輸入，請改用 Chrome / Edge 開啟，或直接手動勾選下方欄位（其他功能不受影響）。</div>
-    <div id="voice-card" class="voice-card">
-      <div class="voice-warn">⚠️ 僅作備物溝通，不作醫囑。<strong>請勿說病人姓名、病歷號或完整 HIS data。</strong></div>
-      <button type="button" id="voice-btn" class="voice-btn">🎙 開始語音輸入</button>
-      <div class="voice-status" id="voice-status">點上方按鈕開始說話</div>
-      <textarea id="voice-text" class="voice-text" placeholder="（語音辨識結果會出現在這裡，可手動修改後再按「套用至欄位」）" maxlength="400"></textarea>
-      <div class="voice-actions">
-        <button type="button" id="voice-apply" class="voice-apply">✓ 套用至下方欄位</button>
-        <button type="button" id="voice-clear" class="voice-clear">清除</button>
-      </div>
-      <div class="voice-hint">支援句型：「備 A line 打 CVC IVPCA」、「ESP block Ropi 5 Decadron 1 Epi 0.1 D5W 到 20 抽 2 隻」</div>
-    </div>
 
     <div class="section-title">Airway 備物</div>
     <div class="prep-card" id="card-lma">
@@ -955,9 +928,16 @@ function renderBoard() {
     const i = TURN_SORT.indexOf(t);
     return i === -1 ? 99 : i;
   }
+  // 狀態優先：手術中 → 待手術 → 已完成
+  const STATUS_SORT = { '手術中': 0, '待手術': 1, '已完成': 2 };
+  function statusSortKey(s) {
+    return (s in STATUS_SORT) ? STATUS_SORT[s] : 1;
+  }
   activeRooms.forEach(roomNum => {
     const cases = all.filter(p => p.currentRoom === roomNum);
     cases.sort((a,b) => {
+      const sa = statusSortKey(a.status), sb = statusSortKey(b.status);
+      if (sa !== sb) return sa - sb;
       const ka = turnSortKey(a.turn), kb = turnSortKey(b.turn);
       if (ka !== kb) return ka - kb;
       return (a.createdAt || a.id) - (b.createdAt || b.id);
@@ -1363,308 +1343,6 @@ function exportCSV() {
   URL.revokeObjectURL(url);
 }
 
-function cn2num(s) {
-  const map = {'零':0,'一':1,'二':2,'兩':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9};
-  s = s.replace(/([一二兩三四五六七八九])十([一二三四五六七八九])/g, (m,a,b)=>String(map[a]*10+map[b]));
-  s = s.replace(/([一二兩三四五六七八九])十/g, (m,a)=>String(map[a]*10));
-  s = s.replace(/十([一二三四五六七八九])/g, (m,b)=>String(10+map[b]));
-  s = s.replace(/十/g, '10');
-  s = s.replace(/[零一二兩三四五六七八九]/g, c=>String(map[c]));
-  s = s.replace(/(\d)\s*點\s*(\d)/g, '$1.$2');
-  return s;
-}
-
-function normalizeVoice(s) {
-  s = cn2num(String(s || ''));
-  s = s.toLowerCase();
-  s = s.replace(/[、，,。.：:；;！!？?\-_／/]/g, ' ');
-  // 常見聽錯校正
-  s = s.replace(/欸\s*萊/g, 'a line');
-  s = s.replace(/欸\s*line/g, 'a line');
-  s = s.replace(/a\s*萊/g, 'a line');
-  s = s.replace(/a\s*線/g, 'a line');
-  s = s.replace(/a\s*來/g, 'a line');
-  s = s.replace(/西\s*v\s*c/g, 'cvc');
-  s = s.replace(/see\s*v\s*c/g, 'cvc');
-  s = s.replace(/i\s*see\s*you/g, 'icu');
-  s = s.replace(/愛\s*西\s*油/g, 'icu');
-  s = s.replace(/益\s*sp/g, 'esp');
-  s = s.replace(/一\s*sp/g, 'esp');
-  s = s.replace(/yes\s*p/g, 'esp');
-  s = s.replace(/踏\s*[pb]/g, 'tap');
-  s = s.replace(/塔\s*p/g, 'tap');
-  s = s.replace(/碰\s*哥?/g, 'peng');
-  s = s.replace(/朋\s*哥?/g, 'peng');
-  s = s.replace(/羅\s*[匹比]\s*卡?\s*因?/g, 'ropivacaine ');
-  s = s.replace(/地\s*卡\s*[龍諾]/g, 'decadron ');
-  s = s.replace(/腎\s*上\s*腺\s*素?/g, 'epinephrine ');
-  s = s.replace(/葡萄糖\s*水?/g, 'd5w ');
-  s = s.replace(/生理\s*食?\s*鹽水/g, 'normal saline ');
-  s = s.replace(/食\s*鹽水/g, 'normal saline ');
-  s = s.replace(/\s+/g, ' ').trim();
-  return s;
-}
-
-// 每個備物項目的同義字 / 諧音變體
-const VOICE_REMINDER_DICT = [
-  ['需 A-line',   ['a line','aline','arterial line','arterial','動脈導管','動脈插管','動脈線','打a','備a']],
-  ['需 CVC',      ['cvc','c v c','central line','中心靜脈','中央靜脈','打cvc','備cvc']],
-  ['需粗 line',   ['粗 line','粗line','粗 iv','粗iv','粗管','粗的管','large bore','ric','大孔']],
-  ['需 DLT',      ['dlt','d l t','double lumen','雙腔管','雙腔','dlc']],
-  ['需 VL',       ['vl','v l','video laryngoscope','影像喉頭鏡','視訊喉頭鏡','影像喉鏡']],
-  ['需 FOB',      ['fob','f o b','fiber','fibre','支氣管鏡','纖維鏡','纖維喉鏡','支鏡']],
-  ['困難 airway', ['困難 airway','困難airway','困難插管','difficult airway','困難呼吸道']],
-  ['ICU postop',  ['icu','i c u','送 icu','送icu','住 icu','術後 icu','進 icu']],
-  ['術後呼吸器',  ['術後呼吸器','術後 呼吸器','插管回','post op ventilator','postop vent','ventilator','呼吸器']],
-  ['高風險',      ['高風險','high risk']],
-  ['尚未麻評',    ['尚未麻評','還沒麻評','未麻評','尚未評估','沒麻評']]
-];
-
-const VOICE_ANALG_DICT = [
-  ['ivpca',         ['ivpca','iv pca','iv-pca','靜脈 pca','靜脈pca']],
-  ['epiduralPCA',   ['epidural pca','硬膜外 pca','硬膜外pca','epi pca','epca','硬脊膜外 pca']],
-  ['dynastat',      ['dynastat','戴納斯特','戴納']],
-  ['acetamol',      ['acetamol','acetaminophen','paracetamol','普拿疼','熱息痛']],
-  ['spinalMorphine',['spinal morphine','脊髓嗎啡','椎管內嗎啡','脊椎嗎啡']]
-];
-
-const VOICE_AIRWAY_DICT = [
-  ['lma',     ['lma','l m a','喉罩']],
-  ['nke',     ['non kinking','non-kinking','non kinking endo','不打結','硬管','加強型','reinforced']],
-  ['nasal',   ['鼻管','nasal tube','nasal','鼻插管']]
-];
-
-const VOICE_MONITOR_DICT = [
-  ['bis',     ['bis','b i s','腦波','麻醉深度']]
-];
-
-const VOICE_NB_DICT = [
-  ['ESP',           ['esp','e s p','erector spinae','椎旁','豎脊肌']],
-  ['TAP',           ['tap','t a p','腹橫肌']],
-  ['PENG',          ['peng','p e n g']],
-  ['FIB',           ['fib','f i b','fascia iliaca','髂筋膜']],
-  ['ACB',           ['acb','a c b','adductor canal','內收肌管']],
-  ['DSB',           ['dsb','d s b']],
-  ['PECS',          ['pecs','pec s','胸大肌']],
-  ['CCB',           ['ccb','c c b']],
-  ['SCB',           ['scb','s c b']],
-  ['superior trunk',['superior trunk','上幹']],
-  ['QL',            ['ql','q l','quadratus','腰方肌']],
-  ['ITP',           ['itp','i t p']],
-  ['FTB',           ['ftb','f t b']],
-  ['popliteal',     ['popliteal','膕窩']],
-  ['Caudal',        ['caudal','薦管','骶管','尾薦']]
-];
-
-function vMatch(norm, syn) {
-  if (!syn) return false;
-  // 含 CJK 用 substring；純 ASCII 短字（≤4 char）強制 word boundary
-  if (/[一-鿿]/.test(syn)) return norm.indexOf(syn) >= 0;
-  if (syn.length <= 4 && /^[a-z\s]+$/.test(syn)) {
-    const re = new RegExp('(^|\\s)' + syn.replace(/\s+/g, '\\s*') + '($|\\s)');
-    return re.test(norm);
-  }
-  return norm.indexOf(syn) >= 0;
-}
-function vMatchAny(norm, syns) {
-  return syns.some(s => vMatch(norm, s));
-}
-
-function parseVoiceText(text) {
-  const t = normalizeVoice(text);
-  const actions = { reminders: [], analgesia: {}, airway: {}, monitoring: {}, nb: {} };
-
-  VOICE_REMINDER_DICT.forEach(item => {
-    if (vMatchAny(t, item[1])) {
-      if (actions.reminders.indexOf(item[0]) < 0) actions.reminders.push(item[0]);
-    }
-  });
-  // 困難 airway → 自動補 需 FOB
-  if (actions.reminders.indexOf('困難 airway') >= 0 && actions.reminders.indexOf('需 FOB') < 0) {
-    actions.reminders.push('需 FOB');
-  }
-
-  VOICE_ANALG_DICT.forEach(item => { if (vMatchAny(t, item[1])) actions.analgesia[item[0]] = true; });
-  VOICE_AIRWAY_DICT.forEach(item => { if (vMatchAny(t, item[1])) actions.airway[item[0]] = true; });
-  VOICE_MONITOR_DICT.forEach(item => { if (vMatchAny(t, item[1])) actions.monitoring[item[0]] = true; });
-
-  // NB block type — 取第一個命中
-  for (const item of VOICE_NB_DICT) {
-    if (vMatchAny(t, item[1])) {
-      actions.nb.enabled = true;
-      actions.nb.blockType = (BLOCK_TYPES.indexOf(item[0]) >= 0) ? item[0] : '其他';
-      break;
-    }
-  }
-
-  // NB 配方數字（normalizeVoice 已把中文藥名轉成英文 + 中文數字轉阿拉伯）
-  const ropi = t.match(/ropi(?:vacaine)?\s*(\d+(?:\.\d+)?)/);
-  if (ropi) { actions.nb.enabled = true; actions.nb.ropivacaineMl = ropi[1]; }
-  const deca = t.match(/decadron\s*(\d+(?:\.\d+)?)/);
-  if (deca) { actions.nb.enabled = true; actions.nb.decadronMl = deca[1]; }
-  const epi = t.match(/(?:epi(?:nephrine)?)\s*(\d+(?:\.\d+)?)/);
-  if (epi) { actions.nb.enabled = true; actions.nb.epinephrineMl = epi[1]; }
-
-  // 稀釋液
-  if (/(?:^|\s)(d5w|d5|5%\s*dextrose)(?:$|\s)/.test(t)) actions.nb.diluentType = 'D5W';
-  else if (/(?:^|\s)(normal saline|ns|n s|saline)(?:$|\s)/.test(t)) actions.nb.diluentType = 'Normal saline';
-
-  // 稀釋至 N ml
-  const diluteTo = t.match(/(?:稀釋\s*[到至]|到|至)\s*(\d+(?:\.\d+)?)\s*(?:ml|毫升|c+)?/);
-  if (diluteTo) { actions.nb.enabled = true; actions.nb.diluteToMl = diluteTo[1]; }
-
-  // 抽 N 隻
-  let cnt = t.match(/抽\s*(\d+)\s*(?:隻|支|劑|管)/);
-  if (!cnt) cnt = t.match(/(\d+)\s*(?:隻|支|管)/);
-  if (cnt) { actions.nb.enabled = true; actions.nb.syringeCount = cnt[1]; }
-
-  return actions;
-}
-
-function mergeActions(a, b) {
-  b.reminders.forEach(r => { if (a.reminders.indexOf(r) < 0) a.reminders.push(r); });
-  Object.keys(b.analgesia).forEach(k => { if (b.analgesia[k]) a.analgesia[k] = true; });
-  Object.keys(b.airway).forEach(k => { if (b.airway[k]) a.airway[k] = true; });
-  Object.keys(b.monitoring).forEach(k => { if (b.monitoring[k]) a.monitoring[k] = true; });
-  if (b.nb && b.nb.enabled) {
-    a.nb.enabled = true;
-    ['blockType','ropivacaineMl','decadronMl','epinephrineMl','diluentType','diluteToMl','syringeCount'].forEach(k => {
-      if (!a.nb[k] && b.nb[k]) a.nb[k] = b.nb[k];
-    });
-  }
-  return a;
-}
-
-function applyVoiceActions(actions) {
-  actions.reminders.forEach(r => selectBtnMulti('reminder', r));
-
-  // Airway
-  const airwayMap = [['lma','chk-lma','card-lma'],['nke','chk-nke','card-nke'],['nasal','chk-nasal','card-nasal']];
-  airwayMap.forEach(s => {
-    if (actions.airway[s[0]]) {
-      const chk = document.getElementById(s[1]); if (chk) chk.checked = true;
-      const card = document.getElementById(s[2]); if (card) card.classList.add('on');
-    }
-  });
-  // Monitoring
-  if (actions.monitoring.bis) {
-    const chk = document.getElementById('chk-bis'); if (chk) chk.checked = true;
-    const card = document.getElementById('card-bis'); if (card) card.classList.add('on');
-  }
-
-  if (actions.nb.enabled) {
-    document.getElementById('chk-nb').checked = true;
-    document.getElementById('card-nb').classList.add('on');
-    if (actions.nb.blockType) selectBtn('nb-type', actions.nb.blockType);
-    if (actions.nb.ropivacaineMl) document.getElementById('nb-ropi').value = actions.nb.ropivacaineMl;
-    if (actions.nb.decadronMl) document.getElementById('nb-deca').value = actions.nb.decadronMl;
-    if (actions.nb.epinephrineMl) document.getElementById('nb-epi').value = actions.nb.epinephrineMl;
-    if (actions.nb.diluentType) selectBtn('nb-diluent', actions.nb.diluentType);
-    if (actions.nb.diluteToMl) document.getElementById('nb-dilute').value = actions.nb.diluteToMl;
-    if (actions.nb.syringeCount) document.getElementById('nb-count').value = actions.nb.syringeCount;
-  }
-  const simple = [['ivpca','chk-ivpca','card-ivpca'],['epiduralPCA','chk-epca','card-epca'],['dynastat','chk-dynastat','card-dynastat'],['acetamol','chk-acetamol','card-acetamol'],['spinalMorphine','chk-spinal','card-spinal']];
-  simple.forEach(s => {
-    if (actions.analgesia[s[0]]) {
-      const chk = document.getElementById(s[1]); if (chk) chk.checked = true;
-      const card = document.getElementById(s[2]); if (card) card.classList.add('on');
-    }
-  });
-}
-
-function setupVoice() {
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const card = document.getElementById('voice-card');
-  const unsupportedTip = document.getElementById('voice-unsupported');
-  if (!SR) {
-    if (card) card.style.display = 'none';
-    if (unsupportedTip) unsupportedTip.style.display = 'block';
-    return;
-  }
-  const recog = new SR();
-  recog.lang = 'zh-TW';
-  recog.interimResults = true;
-  recog.continuous = false;
-  recog.maxAlternatives = 3;
-  let active = false;
-  let baseText = '';
-  let lastAlternatives = [];
-  let lastFinalText = '';
-
-  const btn = document.getElementById('voice-btn');
-  const status = document.getElementById('voice-status');
-  const textArea = document.getElementById('voice-text');
-
-  btn.addEventListener('click', () => {
-    if (active) { try { recog.stop(); } catch(e) {} return; }
-    baseText = textArea.value.trim();
-    lastAlternatives = [];
-    try { recog.start(); } catch(e) { status.textContent = '無法啟動：' + e.message; }
-  });
-
-  // 使用者手動編輯 textarea → 清掉備選清單（不再 union）
-  textArea.addEventListener('input', () => { lastAlternatives = []; lastFinalText = ''; });
-
-  recog.onstart = () => {
-    active = true;
-    btn.textContent = '⏹ 停止錄音';
-    btn.classList.add('recording');
-    status.textContent = '🔴 錄音中…（再按一次停止）';
-  };
-  recog.onresult = (e) => {
-    let interim = '', final = '';
-    for (let i = e.resultIndex; i < e.results.length; i++) {
-      const res = e.results[i];
-      if (res.isFinal) {
-        final += res[0].transcript;
-        for (let j = 1; j < res.length; j++) lastAlternatives.push(res[j].transcript);
-      } else {
-        interim += res[0].transcript;
-      }
-    }
-    const merged = (baseText + (baseText && (final || interim) ? ' ' : '') + final + interim).slice(0, 400);
-    textArea.value = merged;
-    if (final) { baseText = merged; lastFinalText = merged; }
-  };
-  recog.onerror = (e) => {
-    status.textContent = '⚠️ 辨識錯誤：' + (e.error || '未知');
-  };
-  recog.onend = () => {
-    active = false;
-    btn.textContent = '🎙 開始語音輸入';
-    btn.classList.remove('recording');
-    if (!status.textContent.startsWith('⚠️')) status.textContent = '✓ 已停止，確認文字後可按下方「套用至欄位」';
-  };
-
-  document.getElementById('voice-apply').addEventListener('click', () => {
-    const text = textArea.value.trim();
-    if (!text) { alert('沒有可解析的內容'); return; }
-    let actions = parseVoiceText(text);
-    // 若使用者未手動編輯辨識結果，把 SR 給的其他候選也丟進來解析，union 合併
-    if (text === lastFinalText && lastAlternatives.length) {
-      lastAlternatives.forEach(alt => {
-        const altActions = parseVoiceText(alt);
-        actions = mergeActions(actions, altActions);
-      });
-    }
-    applyVoiceActions(actions);
-    const hits = [];
-    if (actions.reminders.length) hits.push('特殊提醒 ' + actions.reminders.length + ' 項');
-    Object.keys(actions.airway).forEach(k => { if (actions.airway[k]) hits.push('Airway:' + k); });
-    if (actions.monitoring.bis) hits.push('BIS');
-    if (actions.nb.enabled) hits.push('NB' + (actions.nb.blockType ? '(' + actions.nb.blockType + ')' : ''));
-    Object.keys(actions.analgesia).forEach(k => { if (actions.analgesia[k]) hits.push(k); });
-    status.textContent = hits.length ? ('✓ 已套用：' + hits.join('、') + '（可手動再修改）') : '⚠️ 沒辨識到關鍵字，請手動勾選或重說一次';
-  });
-  document.getElementById('voice-clear').addEventListener('click', () => {
-    textArea.value = '';
-    baseText = '';
-    lastAlternatives = [];
-    lastFinalText = '';
-    status.textContent = '已清除';
-  });
-}
-
 window.switchPage = switchPage;
 window.exportCSV = exportCSV;
 window.resetAll = resetAll;
@@ -1676,7 +1354,6 @@ window.renderBoard = renderBoard;
 checkAndPurgeStaleData();
 renderGroupBar();
 initInputPage();
-setupVoice();
 startCloudSubscribe();
 scheduleNightlyPurge();
 </script>
