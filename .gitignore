@@ -5,3 +5,5 @@ desktop.ini
 *.bak
 .vscode/
 .idea/
+__pycache__/
+*.pyc
