@@ -1,0 +1,1495 @@
+<!DOCTYPE html>
+<html lang="zh-TW" translate="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="google" content="notranslate">
+  <meta http-equiv="Content-Language" content="zh-TW">
+  <title>彰化秀傳麻醉備物溝通看板（本機版）</title>
+  <style>
+    :root {
+      --bg: #f4f6f9;
+      --card: #ffffff;
+      --ink: #1e3a5f;
+      --ink-soft: #3b6fa0;
+      --ink-2: #5a7593;
+      --line: #d6dee8;
+      --line-soft: #e8edf3;
+      --warn: #c43a31;
+      --warn-bg: #fdecea;
+      --ok: #2e7d4f;
+      --badge-wait: #c98a1a;
+      --badge-current: #c43a31;
+      --badge-done: #2e7d4f;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Microsoft JhengHei", "PingFang TC", "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--ink); padding: 10px; padding-bottom: 84px; font-size: 18px; line-height: 1.5; }
+
+    .header { background: linear-gradient(135deg, #1e3a5f, #3b6fa0); color: white; border-radius: 12px; padding: 14px 18px; margin-bottom: 10px; box-shadow: 0 3px 10px rgba(30,58,95,0.15); }
+    .header h1 { font-size: 22px; font-weight: 700; letter-spacing: 0.5px; }
+    .header .sub { font-size: 16px; opacity: 0.88; margin-top: 2px; }
+
+    .disclaimer { font-size: 14px; color: #5a6a82; background: #eef2f7; padding: 9px 12px; border-left: 4px solid var(--ink-soft); border-radius: 4px; margin-bottom: 12px; line-height: 1.5; }
+
+    .cloud-status { display: inline-block; font-size: 13px; padding: 5px 10px; border-radius: 6px; margin-bottom: 10px; font-weight: 600; }
+    .cloud-status.online { background: #e6f4ea; color: #2e7d4f; border: 1px solid #b6dec3; }
+    .cloud-status.offline { background: #fdecea; color: #c43a31; border: 1px solid #f5b8b3; }
+
+    .group-bar { display: flex; gap: 8px; margin-bottom: 14px; }
+    .group-bar button { flex: 1; min-height: 46px; border: 1.5px solid var(--line); background: white; color: var(--ink); font-size: 16px; font-weight: 600; border-radius: 10px; cursor: pointer; }
+    .group-bar button.active { background: var(--ink); color: white; border-color: var(--ink); }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .section-title { font-size: 16px; font-weight: 700; color: var(--ink); margin: 18px 0 8px 0; padding-left: 10px; border-left: 4px solid var(--ink-soft); }
+    .section-title.first { margin-top: 4px; }
+
+    .btn-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; align-items: center; }
+    .btn-opt { min-height: 44px; background: white; border: 1.5px solid var(--line); padding: 8px 14px; border-radius: 8px; font-size: 16px; font-weight: 500; cursor: pointer; color: var(--ink); }
+    .btn-opt.selected { background: var(--ink-soft); color: white; border-color: var(--ink-soft); }
+    .btn-opt.multi.selected { background: var(--ink); border-color: var(--ink); }
+    .btn-opt.risk-opt { border: 1.5px dashed var(--warn); color: var(--warn); font-weight: 600; }
+    .btn-opt.risk-opt.selected { background: var(--warn); color: white; border-color: var(--warn); }
+
+    .text-input { padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 8px; font-size: 16px; background: white; min-height: 44px; color: var(--ink); }
+    .text-input:focus { border-color: var(--ink-soft); outline: none; }
+    .age-input { width: 110px; text-align: center; font-weight: 600; }
+    .custom-op-input { width: 200px; border: 1.5px dashed var(--ink-soft); font-style: italic; }
+    .custom-op-input:focus { border-style: solid; background: #eef5fb; }
+    .memo-input { width: 100%; font-size: 16px; }
+    .age-container { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+
+    .preset-hint { display: none; font-size: 14px; color: var(--ink-soft); margin: 6px 0; padding: 8px 12px; background: #eef5fb; border-radius: 6px; border-left: 3px solid var(--ink-soft); }
+    .preset-hint.show { display: block; }
+
+    .prep-card { background: #fafcfd; border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; }
+    .prep-card.on { background: #eef5fb; border-color: var(--ink-soft); }
+    .prep-card.nested { margin-left: 24px; border-left: 3px solid var(--ink-soft); position: relative; }
+    .prep-card.nested::before { content: '↳ NB 配套'; position: absolute; top: -10px; left: 12px; background: var(--bg); padding: 0 6px; font-size: 12px; color: var(--ink-soft); font-weight: 600; }
+
+    .prep-toggle { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 600; cursor: pointer; min-height: 36px; color: var(--ink); }
+    .prep-toggle input { width: 22px; height: 22px; accent-color: var(--ink-soft); cursor: pointer; }
+    .prep-body { display: none; margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line); }
+    .prep-card.on .prep-body { display: block; }
+    .prep-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+    .prep-row label { font-size: 15px; color: var(--ink-2); min-width: 96px; font-weight: 600; }
+    .prep-sub-label { font-size: 14px; color: var(--ink-2); margin-bottom: 6px; font-weight: 600; }
+    .ml-input { width: 84px; text-align: center; }
+    .count-input { width: 70px; text-align: center; }
+
+    .submit-btn { width: 100%; background: var(--ok); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 19px; font-weight: 700; margin-top: 20px; min-height: 54px; cursor: pointer; box-shadow: 0 2px 6px rgba(46,125,79,0.25); }
+    .cancel-btn { width: 100%; background: #8a99a8; color: white; border: none; padding: 12px; border-radius: 10px; font-size: 16px; font-weight: 600; margin-top: 10px; min-height: 48px; cursor: pointer; }
+
+    .op-placeholder { font-size: 14px; color: #889aae; font-style: italic; padding: 8px 0; }
+
+    .board-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+    .board-top h2 { font-size: 20px; font-weight: 700; color: var(--ink); }
+    .board-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .board-actions button { padding: 8px 14px; border: 1.5px solid var(--line); background: white; color: var(--ink); border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; min-height: 40px; }
+    .board-actions button.warn { color: var(--warn); border-color: var(--warn); }
+
+    .room-block { background: var(--card); border-radius: 12px; padding: 14px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(30,58,95,0.08); border: 1px solid var(--line-soft); }
+    .room-title { font-size: 22px; font-weight: 900; color: var(--ink); border-left: 6px solid var(--ink-soft); padding-left: 12px; margin-bottom: 12px; }
+    .room-title .count { font-size: 14px; font-weight: 600; color: var(--ink-2); margin-left: 8px; }
+
+    .case-card { background: white; border: 1.5px solid var(--line); border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+    .case-card:last-child { margin-bottom: 0; }
+    .case-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+    .badge { padding: 5px 12px; border-radius: 999px; font-size: 14px; font-weight: 700; color: white; cursor: pointer; min-height: 30px; line-height: 1.4; border: none; }
+    .badge.wait { background: var(--badge-wait); }
+    .badge.current { background: var(--badge-current); }
+    .badge.done { background: var(--badge-done); }
+    .case-headline { font-size: 20px; font-weight: 700; color: var(--ink); flex: 1; min-width: 200px; word-break: break-word; }
+
+    .room-jump { font-size: 16px; color: var(--warn); background: var(--warn-bg); padding: 8px 12px; border-radius: 6px; margin-bottom: 8px; font-weight: 700; }
+
+    .prep-block { background: #f7faff; border-left: 4px solid var(--ink-soft); padding: 10px 12px; border-radius: 6px; margin-bottom: 8px; font-size: 16px; line-height: 1.65; color: var(--ink); white-space: pre-wrap; word-break: break-word; }
+
+    .reminders { font-size: 16px; font-weight: 700; color: var(--warn); margin-bottom: 8px; line-height: 1.5; }
+    .anes-clear { display: inline-block; margin-left: 8px; font-size: 13px; padding: 4px 10px; background: var(--ok); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; }
+
+    .hxdata { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+    .hxdata-pill { font-size: 14px; padding: 7px 12px; background: #eef2f7; color: var(--ink); border-radius: 6px; cursor: pointer; border: none; font-weight: 600; min-height: 36px; }
+    .hxdata-pill.open { background: var(--ink); color: white; }
+    .hxdata-detail { font-size: 15px; color: var(--ink); background: #f4f6f9; padding: 8px 12px; border-radius: 6px; margin-bottom: 8px; line-height: 1.5; word-break: break-word; }
+
+    .memo-show { font-size: 15px; color: var(--ink-soft); font-style: italic; padding: 6px 0; word-break: break-word; }
+
+    .case-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; padding-top: 10px; border-top: 1px solid var(--line-soft); }
+    .case-actions button { font-size: 14px; padding: 8px 12px; border: 1.5px solid var(--line); background: white; color: var(--ink); border-radius: 6px; cursor: pointer; font-weight: 600; min-height: 40px; }
+    .case-actions button.primary { color: white; background: var(--ink-soft); border-color: var(--ink-soft); }
+    .case-actions button.warn { color: var(--warn); border-color: var(--warn); }
+    .case-actions button.ok { color: white; background: var(--ok); border-color: var(--ok); }
+
+    .empty-tip { text-align: center; color: #889aae; margin-top: 40px; font-size: 18px; padding: 40px 20px; background: white; border-radius: 12px; border: 1px dashed var(--line); }
+
+    .nav { position: fixed; bottom: 0; left: 0; right: 0; height: 64px; background: white; border-top: 1px solid var(--line); display: flex; justify-content: space-around; align-items: center; z-index: 100; box-shadow: 0 -2px 8px rgba(0,0,0,0.05); }
+    .nav-btn { background: none; border: none; font-size: 17px; font-weight: 700; color: #889aae; width: 50%; height: 100%; cursor: pointer; }
+    .nav-btn.active { color: var(--ink); background: #eef5fb; }
+
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(30,58,95,0.55); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: white; border-radius: 12px; padding: 18px; width: 100%; max-width: 380px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+    .modal h3 { font-size: 18px; color: var(--ink); margin-bottom: 12px; }
+    .modal .room-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .modal .room-grid button { min-width: 70px; min-height: 44px; padding: 8px 14px; border: 1.5px solid var(--line); background: white; border-radius: 8px; font-weight: 600; font-size: 16px; cursor: pointer; color: var(--ink); }
+    .modal .room-grid button.current { border-color: var(--ink); background: var(--ink); color: white; }
+    .modal .close { width: 100%; padding: 10px; background: #8a99a8; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; min-height: 44px; font-size: 16px; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>彰化秀傳麻醉科</h1>
+    <div class="sub">麻醉備物溝通看板（本機離線版）</div>
+  </div>
+  <div class="disclaimer">
+    本工具僅供彰化秀傳麻醉科 OR 內部備物溝通，不作為正式醫囑或病歷紀錄。實際藥物、劑量、濃度與給藥仍以麻醉醫師現場確認與院內規範為準。
+  </div>
+  <div id="cloud-status" class="cloud-status offline">☁ 連線中…</div>
+  <div class="group-bar" id="group-bar"></div>
+
+  <div id="input-page" class="page active"></div>
+
+  <div id="board-page" class="page">
+    <div class="board-top">
+      <h2>今日麻醉備物</h2>
+      <div class="board-actions">
+        <button onclick="exportCSV()">📥 匯出 CSV</button>
+        <button class="warn" onclick="resetAll()">重置全天</button>
+      </div>
+    </div>
+    <div id="board-container"></div>
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn active" id="nav-input" onclick="switchPage('input-page', this)">📱 新增 case</button>
+    <button class="nav-btn" id="nav-board" onclick="switchPage('board-page', this); renderBoard();">📊 看板</button>
+  </div>
+
+  <div class="modal-overlay" id="room-change-modal">
+    <div class="modal">
+      <h3>跳房：選擇新房間</h3>
+      <div class="room-grid" id="room-change-grid"></div>
+      <button class="close" onclick="closeRoomChange()">取消</button>
+    </div>
+  </div>
+
+<script>
+/* ===== 本機離線版（自給自足，雙擊即可開） =====
+   不從 gstatic 載入 Firebase SDK、也不靠 netlify；改用 Firebase Realtime Database
+   的 REST API + 每 3 秒輪詢。整個檔案自己就能跑出畫面，醫院就算擋掉 netlify / Google
+   SDK 也載得起來。即時同步仍需連得到資料庫網域 firebasedatabase.app（被擋時會自動
+   退成離線單機模式，資料只存這台）。 */
+const DB_BASE = "https://anesthesia-prep-board-default-rtdb.asia-southeast1.firebasedatabase.app";
+const POLL_MS = 3000;
+let cloudOnline = false;
+let pollTimer = null;
+let writing = 0;   // 寫入進行中暫停輪詢覆蓋，避免剛新增的 case 被蓋掉
+
+async function cloudWriteCase(p) {
+  writing++;
+  try {
+    const r = await fetch(DB_BASE + '/cases/' + p.id + '.json', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(p)
+    });
+    cloudOnline = r.ok; updateCloudStatus();
+  } catch(e) { cloudOnline = false; updateCloudStatus(); }
+  finally { writing--; }
+  pollOnce();
+}
+async function cloudDeleteCase(id) {
+  writing++;
+  try {
+    const r = await fetch(DB_BASE + '/cases/' + id + '.json', { method: 'DELETE' });
+    cloudOnline = r.ok; updateCloudStatus();
+  } catch(e) { cloudOnline = false; updateCloudStatus(); }
+  finally { writing--; }
+  pollOnce();
+}
+async function cloudPurgeAll() {
+  writing++;
+  try {
+    const r = await fetch(DB_BASE + '/cases.json', { method: 'DELETE' });
+    cloudOnline = r.ok; updateCloudStatus();
+  } catch(e) { cloudOnline = false; updateCloudStatus(); }
+  finally { writing--; }
+  pollOnce();
+}
+async function pollOnce() {
+  if (writing > 0) return;
+  try {
+    const r = await fetch(DB_BASE + '/cases.json', { cache: 'no-store' });
+    if (!r.ok) throw new Error('http ' + r.status);
+    const val = (await r.json()) || {};
+    cloudOnline = true;
+    const today = todayStr();
+    const valid = [];
+    Object.entries(val).forEach(([id, p]) => {
+      if (!p) return;
+      const d = p.date || today;
+      if (d === today) valid.push(p);
+      else { fetch(DB_BASE + '/cases/' + id + '.json', { method: 'DELETE' }).catch(()=>{}); }
+    });
+    localStorage.setItem(STORAGE_KEYS.patients, JSON.stringify(valid));
+    localStorage.setItem(STORAGE_KEYS.dataDate, today);
+    updateCloudStatus();
+    const boardEl = document.getElementById('board-page');
+    if (boardEl && boardEl.classList.contains('active')) renderBoard();
+  } catch(e) {
+    cloudOnline = false;
+    updateCloudStatus();
+  }
+}
+function startCloudSubscribe() {
+  pollOnce();
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(pollOnce, POLL_MS);
+}
+function updateCloudStatus() {
+  const el = document.getElementById('cloud-status');
+  if (!el) return;
+  el.textContent = cloudOnline ? '☁ 雲端同步中（每 3 秒更新）' : '⚠ 離線模式（僅存本機，未連到雲端）';
+  el.className = 'cloud-status ' + (cloudOnline ? 'online' : 'offline');
+}
+
+const STORAGE_KEYS = {
+  patients: 'anesthesiaPrep_patients',
+  selectedRoomGroup: 'anesthesiaPrep_selectedRoomGroup',
+  dataDate: 'anesthesiaPrep_dataDate'
+};
+
+const ROOM_GROUPS = {
+  day_front: { label: '白班前段', rooms: ['1','2','5','6','13'] },
+  day_back:  { label: '白班後段', rooms: ['7','8','9','11','13','18'] },
+  duty:      { label: '值班',     rooms: ['1','2','5','6','7','8','9','11','13','18'] }
+};
+
+const OP_MAPPING = {
+  'Ortho': ['TKR', 'THR', '膝關節鏡', 'RCT', 'radius', 'humerus', 'clavicle', 'femur', 'tibia', 'patella', 'ankle', 'pelvic', 'PELD', 'L-spine', 'C-spine', '骨水泥'],
+  'ENT':   ['FESS', 'LMS', 'Tympanoplasty', 'Thyroid', 'tumor excision', 'LN biopsy', 'tonsillectomy'],
+  'NS':    ['Craniotomy', 'L spine', 'C spine', 'VP-shunt', 'RF', '骨水泥', 'brain tumor', 'pituitary tumor', 'ICP monitor'],
+  'CS':    ['Wedge', 'Rib fracture', 'Lobectomy', 'segemenctectomy', '食道擴張', 'Esophagectomy', 'tracheostomy', 'PP window'],
+  'CVS':   ['CABG', 'AVR', 'MVR', 'AV shunt', 'Varicose', 'TEVAR', 'AAA stent', 'type A', 'perm-cath'],
+  'GYN':   ['子宮鏡', 'ATH', 'LAVH', 'Myomectomy', 'D&C', 'C/S', 'Open Debulking', 'Laparoscopic Staging', '卵巢手術'],
+  'GU':    ['TURBT', 'RIRS', 'RRP', '膀胱鏡', 'URSL', 'TURP', 'vasetomy', 'hernia'],
+  'PS':    ['Debridement', 'STSG', 'Flap', '整形'],
+  'OS':    ['free flap', 'wide excision', 'zygoma fracture', '拔牙'],
+  'GS':    ['LC', 'Appen', 'Hernia', '切胃', '切肝', 'port A', 'thyroid', 'parathyroid', 'GI RF'],
+  'CRS':   ['Hemicolectomy', 'AR', 'LAR', 'Anal fistula', 'hemorrhoid', '腸造口'],
+  'BS':    ['Partial mastectomy', 'MRM'],
+  'OPH':   ['眼科手術']
+};
+
+const OP_PRESETS = {
+  'Lobectomy':            ['需 A-line', '需 DLT', 'Post OP ICU'],
+  'Wedge':                ['需 DLT'],
+  'segemenctectomy':      ['需 A-line', '需 DLT'],
+  'Esophagectomy':        ['需 A-line', '需 DLT', '需粗 line', 'Post OP ICU'],
+  '切肝':                 ['需 A-line', '需 CVC'],
+  '切胃':                 ['需 A-line'],
+  'CABG':                 ['需 A-line', '需 CVC', 'Post OP ICU', '術後呼吸器'],
+  'AVR':                  ['需 A-line', '需 CVC', 'Post OP ICU', '術後呼吸器'],
+  'MVR':                  ['需 A-line', '需 CVC', 'Post OP ICU', '術後呼吸器'],
+  'Craniotomy':           ['需 A-line', 'Post OP ICU'],
+  'brain tumor':          ['需 A-line', 'Post OP ICU'],
+  'pituitary tumor':      ['需 A-line'],
+  'LAR':                  ['需 A-line'],
+  'Hemicolectomy':        ['需 A-line'],
+  'free flap':            ['需 A-line', '需 CVC'],
+  'Open Debulking':       ['需 A-line', '需 CVC'],
+  'Laparoscopic Staging': ['需 A-line', '需 CVC']
+};
+
+const REMINDER_LIST = ['高風險', '未麻訪', 'Awake 插管', '需 FOB', '需 DLT', '需 A-line', '需粗 line', '需 CVC', '術後呼吸器', 'Post OP ICU'];
+const HX_LIST = ['HTN','DM','CAD','Af','CVA','asthma','COPD','CKD','H/D','BMI','BW>100kg','肝硬化','Bokey','Plavix','NOAC','有停藥'];
+const DATA_LIST = ['CXR ok','cardiomegaly','infiltration','EKG ok','STD','TWI','RBBB','echo ok','EF<50','EF<40','Hb < 10','Plt<10萬','eGFR<30','Na<130','K > 5.5','GOT>120','INR>1.5'];
+const ANES_LIST = ['GA','SA','IVG','EA'];
+const GENDER_LIST = ['M','F'];
+const TURN_LIST = ['第1台','第2台','第3台','第4台','急診插入','其他'];
+const BLOCK_TYPES = ['ESP','TAP','PENG','FIB','ACB','DSB','PECS','CCB','SCB','superior trunk','QL','ITP','FTB','popliteal','Caudal','其他'];
+const DILUENTS = ['Normal saline','D5W'];
+const STATUS_ORDER = ['待手術','手術中','已完成'];
+
+let currentRoomGroup = loadRoomGroup();
+let editingId = null;
+const expandedHx = new Set();
+const expandedData = new Set();
+let pendingRoomChangeId = null;
+
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function loadPatients() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.patients)) || []; }
+  catch(e) { return []; }
+}
+function savePatients(list) {
+  localStorage.setItem(STORAGE_KEYS.patients, JSON.stringify(list));
+  localStorage.setItem(STORAGE_KEYS.dataDate, todayStr());
+}
+function checkAndPurgeStaleData() {
+  const storedDate = localStorage.getItem(STORAGE_KEYS.dataDate);
+  if (storedDate && storedDate !== todayStr()) {
+    localStorage.removeItem(STORAGE_KEYS.patients);
+  }
+  localStorage.setItem(STORAGE_KEYS.dataDate, todayStr());
+}
+function scheduleNightlyPurge() {
+  const now = new Date();
+  const next = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 0, 0);
+  if (next <= now) next.setDate(next.getDate() + 1);
+  const ms = next.getTime() - now.getTime();
+  setTimeout(() => {
+    localStorage.removeItem(STORAGE_KEYS.patients);
+    localStorage.setItem(STORAGE_KEYS.dataDate, todayStr());
+    expandedHx.clear(); expandedData.clear();
+    cloudPurgeAll();
+    if (document.getElementById('board-page').classList.contains('active')) renderBoard();
+    try { alert('已自動清除今日資料（23:59 排程）'); } catch(e) {}
+    scheduleNightlyPurge();
+  }, ms);
+}
+
+function loadRoomGroup() {
+  return localStorage.getItem(STORAGE_KEYS.selectedRoomGroup) || 'day_front';
+}
+function saveRoomGroup(g) {
+  localStorage.setItem(STORAGE_KEYS.selectedRoomGroup, g);
+}
+
+function renderGroupBar() {
+  const bar = document.getElementById('group-bar');
+  bar.innerHTML = '';
+  Object.entries(ROOM_GROUPS).forEach(([key, cfg]) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = cfg.label;
+    if (key === currentRoomGroup) btn.classList.add('active');
+    btn.onclick = () => {
+      currentRoomGroup = key;
+      saveRoomGroup(key);
+      renderGroupBar();
+      renderRoomButtons();
+      if (document.getElementById('board-page').classList.contains('active')) renderBoard();
+    };
+    bar.appendChild(btn);
+  });
+}
+
+function renderRoomButtons() {
+  const container = document.getElementById('field-room');
+  if (!container) return;
+  const rooms = ROOM_GROUPS[currentRoomGroup].rooms;
+  const prevBtn = container.querySelector('.btn-opt.selected');
+  const prevSelected = prevBtn ? prevBtn.dataset.value : '';
+  container.innerHTML = '';
+  rooms.forEach(r => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn-opt single';
+    btn.dataset.value = r;
+    btn.textContent = 'R' + r;
+    if (r === prevSelected) btn.classList.add('selected');
+    btn.onclick = () => {
+      container.querySelectorAll('.btn-opt').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    };
+    container.appendChild(btn);
+  });
+}
+
+function initInputPage() {
+  const page = document.getElementById('input-page');
+  page.innerHTML = `
+    <div class="section-title first">Room（依班別過濾）</div>
+    <div class="btn-group" id="field-room"></div>
+
+    <div class="section-title">第幾台</div>
+    <div class="btn-group" id="field-turn"></div>
+    <input type="text" id="turn-custom" class="text-input" placeholder="✎ 其他（自填）" maxlength="20" style="display:none; width:220px; margin-top:6px;">
+
+    <div class="section-title">年齡 / 性別</div>
+    <div class="age-container">
+      <input type="number" inputmode="numeric" id="age-input" class="text-input age-input" placeholder="年齡" min="0" max="120">
+      <span style="font-weight:600;color:var(--ink-2)">歲</span>
+      <div class="btn-group" id="field-gender" style="margin:0;"></div>
+    </div>
+
+    <div class="section-title">科別</div>
+    <div class="btn-group" id="field-dept"></div>
+
+    <div class="section-title">術式</div>
+    <div class="btn-group" id="field-op">
+      <div class="op-placeholder" id="op-tip">💡 請先點選上方「科別」</div>
+    </div>
+    <div class="preset-hint" id="preset-hint"></div>
+
+    <div class="section-title">麻醉方式</div>
+    <div class="btn-group" id="field-anes"></div>
+
+    <div class="section-title">Airway 備物</div>
+    <div class="prep-card" id="card-lma">
+      <label class="prep-toggle">
+        <input type="checkbox" id="chk-lma">
+        <span>LMA</span>
+      </label>
+    </div>
+    <div class="prep-card" id="card-nke">
+      <label class="prep-toggle">
+        <input type="checkbox" id="chk-nke">
+        <span>Non-kinking endo</span>
+      </label>
+    </div>
+    <div class="prep-card" id="card-nasal">
+      <label class="prep-toggle">
+        <input type="checkbox" id="chk-nasal">
+        <span>鼻管</span>
+      </label>
+    </div>
+    <div class="prep-card" id="card-hfnc">
+      <label class="prep-toggle">
+        <input type="checkbox" id="chk-hfnc">
+        <span>HFNC</span>
+      </label>
+    </div>
+
+    <div class="section-title">Monitoring 備物</div>
+    <div class="prep-card" id="card-bis">
+      <label class="prep-toggle">
+        <input type="checkbox" id="chk-bis">
+        <span>BIS</span>
+      </label>
+    </div>
+    <div class="prep-card" id="card-cvp">
+      <label class="prep-toggle">
+        <input type="checkbox" id="chk-cvp">
+        <span>CVP kit</span>
+      </label>
+    </div>
+
+    <div class="section-title">備藥</div>
+    <div class="prep-card" id="card-propofol-tci">
+      <label class="prep-toggle"><input type="checkbox" id="chk-propofol-tci"><span>Propofol TCI</span></label>
+    </div>
+    <div class="prep-card" id="card-remi-tci">
+      <label class="prep-toggle"><input type="checkbox" id="chk-remi-tci"><span>Remifentanil TCI</span></label>
+    </div>
+    <div class="prep-card" id="card-nimbex">
+      <label class="prep-toggle"><input type="checkbox" id="chk-nimbex"><span>Nimbex</span></label>
+    </div>
+    <div class="prep-card" id="card-anectine">
+      <label class="prep-toggle"><input type="checkbox" id="chk-anectine"><span>Anectine</span></label>
+    </div>
+    <div class="prep-card" id="card-levophed">
+      <label class="prep-toggle"><input type="checkbox" id="chk-levophed"><span>Levophed 10mcg/ml</span></label>
+    </div>
+    <div class="prep-card" id="card-ketamine">
+      <label class="prep-toggle"><input type="checkbox" id="chk-ketamine"><span>Ketamine</span></label>
+    </div>
+    <div class="prep-card" id="card-droperidol">
+      <label class="prep-toggle"><input type="checkbox" id="chk-droperidol"><span>Droperidol</span></label>
+    </div>
+    <div class="prep-card" id="card-etomidate">
+      <label class="prep-toggle"><input type="checkbox" id="chk-etomidate"><span>Etomidate</span></label>
+    </div>
+
+    <div class="section-title">止痛備物</div>
+
+    <div class="prep-card" id="card-nb">
+      <label class="prep-toggle">
+        <input type="checkbox" id="chk-nb">
+        <span>Nerve block</span>
+      </label>
+      <div class="prep-body">
+        <div class="prep-sub-label">Block type</div>
+        <div class="btn-group" id="field-nb-type"></div>
+        <input type="text" id="nb-type-custom" class="text-input" placeholder="✎ 其他 block type 自填" maxlength="30" style="display:none; margin-top:6px; width: 280px;">
+
+        <div class="prep-sub-label" style="margin-top:10px;">每隻針筒配方</div>
+        <div class="prep-row"><label>Ropivacaine</label><input id="nb-ropi" class="text-input ml-input" type="text" inputmode="decimal"><span>ml</span></div>
+        <div class="prep-row"><label>Decadron</label><input id="nb-deca" class="text-input ml-input" type="text" inputmode="decimal"><span>ml</span></div>
+        <div class="prep-row"><label>Epinephrine</label><input id="nb-epi" class="text-input ml-input" type="text" inputmode="decimal"><span>ml</span></div>
+
+        <div class="prep-sub-label" style="margin-top:10px;">稀釋液</div>
+        <div class="btn-group" id="field-nb-diluent"></div>
+
+        <div class="prep-row" style="margin-top:10px;"><label>每隻稀釋至</label><input id="nb-dilute" class="text-input ml-input" type="text" inputmode="decimal"><span>ml</span></div>
+        <div class="prep-row"><label>抽幾隻</label><input id="nb-count" class="text-input count-input" type="text" inputmode="numeric"><span>隻</span></div>
+      </div>
+    </div>
+
+    <div class="prep-card nested" id="card-testing">
+      <label class="prep-toggle">
+        <input type="checkbox" id="chk-testing">
+        <span>Testing syringe</span>
+      </label>
+      <div class="prep-body">
+        <div class="prep-row"><label>Lidocaine</label><input id="t-lido" class="text-input ml-input" type="text" inputmode="decimal"><span>ml</span></div>
+
+        <div class="prep-sub-label" style="margin-top:6px;">稀釋液</div>
+        <div class="btn-group" id="field-t-diluent"></div>
+
+        <div class="prep-row" style="margin-top:10px;"><label>每隻稀釋至</label><input id="t-dilute" class="text-input ml-input" type="text" inputmode="decimal"><span>ml</span></div>
+        <div class="prep-row"><label>抽幾隻</label><input id="t-count" class="text-input count-input" type="text" inputmode="numeric"><span>隻</span></div>
+      </div>
+    </div>
+
+    <div class="prep-card" id="card-spinal">
+      <label class="prep-toggle"><input type="checkbox" id="chk-spinal"><span>Spinal morphine</span></label>
+    </div>
+    <div class="prep-card" id="card-dynastat">
+      <label class="prep-toggle"><input type="checkbox" id="chk-dynastat"><span>Dynastat</span></label>
+    </div>
+    <div class="prep-card" id="card-acetamol">
+      <label class="prep-toggle"><input type="checkbox" id="chk-acetamol"><span>Acetamol</span></label>
+    </div>
+    <div class="prep-card" id="card-epca">
+      <label class="prep-toggle"><input type="checkbox" id="chk-epca"><span>Epidural PCA</span></label>
+    </div>
+    <div class="prep-card" id="card-ivpca">
+      <label class="prep-toggle"><input type="checkbox" id="chk-ivpca"><span>IVPCA</span></label>
+    </div>
+
+    <div class="section-title">特殊提醒</div>
+    <div class="btn-group" id="field-reminder"></div>
+
+    <div class="section-title">Hx（病史）</div>
+    <div class="btn-group" id="field-hx"></div>
+
+    <div class="section-title">Data（異常指標）</div>
+    <div class="btn-group" id="field-data"></div>
+
+    <div class="section-title">備註（最多 80 字）</div>
+    <input type="text" id="memo-input" class="text-input memo-input" placeholder="請勿輸入姓名、病歷號或完整病歷內容" maxlength="80">
+
+    <button class="submit-btn" id="submit-btn" onclick="submitPatient()">送出到看板</button>
+    <button class="cancel-btn" id="cancel-edit-btn" onclick="cancelEdit()" style="display:none;">取消編輯</button>
+  `;
+
+  renderRoomButtons();
+  createBtns('turn', TURN_LIST, false, false, (v) => {
+    const custom = document.getElementById('turn-custom');
+    custom.style.display = (v === '其他') ? 'inline-block' : 'none';
+    if (v !== '其他') custom.value = '';
+  });
+  createBtns('gender', GENDER_LIST);
+  createBtns('dept', Object.keys(OP_MAPPING));
+  createBtns('anes', ANES_LIST);
+  selectBtn('anes', 'GA');
+
+  createBtns('reminder', REMINDER_LIST, true, true);
+  createBtns('hx', HX_LIST, true);
+  createBtns('data', DATA_LIST, true);
+
+  createBtns('nb-type', BLOCK_TYPES, false, false, (v) => {
+    const custom = document.getElementById('nb-type-custom');
+    if (!custom) return;
+    if (v === '其他') {
+      custom.style.display = 'inline-block';
+    } else {
+      custom.style.display = 'none';
+      custom.value = '';
+    }
+  });
+  createBtns('nb-diluent', DILUENTS);
+  createBtns('t-diluent', DILUENTS);
+  selectBtn('nb-diluent', 'Normal saline');
+  selectBtn('t-diluent', 'Normal saline');
+
+  ['lma','nke','nasal','hfnc','bis','cvp','propofol-tci','remi-tci','nimbex','anectine','levophed','ketamine','droperidol','etomidate','nb','testing','spinal','dynastat','acetamol','epca','ivpca'].forEach(k => {
+    const el = document.getElementById('chk-' + k);
+    if (!el) return;
+    el.addEventListener('change', () => {
+      const card = document.getElementById('card-' + k);
+      if (card) card.classList.toggle('on', el.checked);
+    });
+  });
+}
+
+function createBtns(id, list, isMulti, isRisk, onAfter) {
+  const container = document.getElementById('field-' + id);
+  if (!container) return;
+  container.innerHTML = '';
+  list.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn-opt ' + (isMulti ? 'multi' : 'single') + (isRisk ? ' risk-opt' : '');
+    btn.textContent = opt;
+    btn.dataset.value = opt;
+    btn.onclick = () => {
+      if (!isMulti) container.querySelectorAll('.btn-opt').forEach(b => b.classList.remove('selected'));
+      btn.classList.toggle('selected');
+      if (id === 'dept') updateOpButtons(opt);
+      if (onAfter) onAfter(opt, btn);
+    };
+    container.appendChild(btn);
+  });
+}
+
+function updateOpButtons(dept) {
+  const container = document.getElementById('field-op');
+  container.innerHTML = '';
+  (OP_MAPPING[dept] || []).forEach(name => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn-opt single';
+    btn.dataset.value = name;
+    btn.textContent = name;
+    btn.onclick = () => {
+      container.querySelectorAll('.btn-opt').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      const customEl = document.getElementById('custom-op');
+      if (customEl) customEl.value = '';
+      applyOpPreset(name);
+    };
+    container.appendChild(btn);
+  });
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.id = 'custom-op';
+  input.className = 'text-input custom-op-input';
+  input.placeholder = '✎ 自填術式';
+  input.maxLength = 40;
+  input.oninput = () => {
+    container.querySelectorAll('.btn-opt').forEach(b => b.classList.remove('selected'));
+    hidePresetHint();
+  };
+  container.appendChild(input);
+  hidePresetHint();
+}
+
+function applyOpPreset(op) {
+  const preset = OP_PRESETS[op];
+  hidePresetHint();
+  if (!preset || !preset.length) return;
+  document.querySelectorAll('#field-reminder .btn-opt').forEach(b => {
+    if (preset.indexOf(b.dataset.value) >= 0 && !b.classList.contains('selected')) {
+      b.classList.add('selected');
+    }
+  });
+  const hint = document.getElementById('preset-hint');
+  hint.textContent = '💡 已自動帶入：' + preset.join('、') + '（不要的請於下方特殊提醒取消）';
+  hint.classList.add('show');
+}
+function hidePresetHint() {
+  const hint = document.getElementById('preset-hint');
+  if (hint) hint.classList.remove('show');
+}
+
+function getSingleSelected(id) {
+  const btn = document.querySelector('#field-' + id + ' .btn-opt.selected');
+  return btn ? btn.dataset.value : '';
+}
+function getMultiSelected(id) {
+  return Array.from(document.querySelectorAll('#field-' + id + ' .btn-opt.selected')).map(b => b.dataset.value);
+}
+function selectBtn(id, val) {
+  if (!val) return;
+  const btns = document.querySelectorAll('#field-' + id + ' .btn-opt');
+  let found = false;
+  btns.forEach(b => { if (b.dataset.value === val) found = true; });
+  if (!found) return;
+  btns.forEach(b => b.classList.remove('selected'));
+  btns.forEach(b => { if (b.dataset.value === val) b.classList.add('selected'); });
+}
+function selectBtnMulti(id, val) {
+  if (!val) return;
+  document.querySelectorAll('#field-' + id + ' .btn-opt').forEach(b => {
+    if (b.dataset.value === val) b.classList.add('selected');
+  });
+}
+
+function readForm() {
+  const room = getSingleSelected('room');
+  const turn = getSingleSelected('turn');
+  const turnCustom = document.getElementById('turn-custom').value.trim().slice(0,20);
+  const finalTurn = (turn === '其他') ? (turnCustom || '其他') : turn;
+
+  const customOpEl = document.getElementById('custom-op');
+  const customOp = customOpEl ? customOpEl.value.trim().slice(0,40) : '';
+  const op = customOp || getSingleSelected('op');
+
+  const nbTypeRaw = getSingleSelected('nb-type');
+  const nbTypeCustom = document.getElementById('nb-type-custom').value.trim().slice(0,30);
+  const nbTypeFinal = (nbTypeRaw === '其他') ? (nbTypeCustom || '其他') : nbTypeRaw;
+
+  return {
+    room,
+    turn: finalTurn,
+    age: document.getElementById('age-input').value.trim().slice(0,3),
+    gender: getSingleSelected('gender'),
+    dept: getSingleSelected('dept'),
+    op,
+    anes: getSingleSelected('anes'),
+    airway: {
+      lma: document.getElementById('chk-lma').checked,
+      nonKinkingEndo: document.getElementById('chk-nke').checked,
+      nasalTube: document.getElementById('chk-nasal').checked,
+      hfnc: document.getElementById('chk-hfnc').checked
+    },
+    monitoring: {
+      bis: document.getElementById('chk-bis').checked,
+      cvpKit: document.getElementById('chk-cvp').checked
+    },
+    medications: {
+      propofolTci: document.getElementById('chk-propofol-tci').checked,
+      remiTci: document.getElementById('chk-remi-tci').checked,
+      nimbex: document.getElementById('chk-nimbex').checked,
+      anectine: document.getElementById('chk-anectine').checked,
+      levophed: document.getElementById('chk-levophed').checked,
+      ketamine: document.getElementById('chk-ketamine').checked,
+      droperidol: document.getElementById('chk-droperidol').checked,
+      etomidate: document.getElementById('chk-etomidate').checked
+    },
+    analgesia: {
+      nerveBlock: {
+        enabled: document.getElementById('chk-nb').checked,
+        blockType: nbTypeFinal,
+        perSyringe: {
+          ropivacaineMl: document.getElementById('nb-ropi').value.trim(),
+          decadronMl: document.getElementById('nb-deca').value.trim(),
+          epinephrineMl: document.getElementById('nb-epi').value.trim(),
+          diluentType: getSingleSelected('nb-diluent'),
+          diluteToMl: document.getElementById('nb-dilute').value.trim()
+        },
+        syringeCount: document.getElementById('nb-count').value.trim()
+      },
+      testing: {
+        enabled: document.getElementById('chk-testing').checked,
+        perSyringe: {
+          lidocaineMl: document.getElementById('t-lido').value.trim(),
+          diluentType: getSingleSelected('t-diluent'),
+          diluteToMl: document.getElementById('t-dilute').value.trim()
+        },
+        syringeCount: document.getElementById('t-count').value.trim()
+      },
+      spinalMorphine: document.getElementById('chk-spinal').checked,
+      dynastat: document.getElementById('chk-dynastat').checked,
+      acetamol: document.getElementById('chk-acetamol').checked,
+      epiduralPCA: document.getElementById('chk-epca').checked,
+      ivpca: document.getElementById('chk-ivpca').checked
+    },
+    reminders: getMultiSelected('reminder'),
+    hx: getMultiSelected('hx'),
+    data: getMultiSelected('data'),
+    memo: document.getElementById('memo-input').value.trim().slice(0,80)
+  };
+}
+
+function submitPatient() {
+  const form = readForm();
+  if (!form.room) { alert('請至少選擇 Room！'); return; }
+
+  const list = loadPatients();
+  if (editingId != null) {
+    const idx = list.findIndex(p => p.id === editingId);
+    if (idx >= 0) {
+      const existing = list[idx];
+      list[idx] = Object.assign({}, existing, {
+        currentRoom: form.room,
+        turn: form.turn,
+        age: form.age,
+        gender: form.gender,
+        dept: form.dept,
+        op: form.op,
+        anes: form.anes,
+        airway: form.airway,
+        monitoring: form.monitoring,
+        medications: form.medications,
+        analgesia: form.analgesia,
+        reminders: form.reminders,
+        hx: form.hx,
+        data: form.data,
+        memo: form.memo
+      });
+    }
+    const updatedId = editingId;
+    editingId = null;
+    document.getElementById('submit-btn').textContent = '送出到看板';
+    document.getElementById('cancel-edit-btn').style.display = 'none';
+    savePatients(list);
+    const updated = list.find(p => p.id === updatedId);
+    if (updated) cloudWriteCase(updated);
+    resetForm();
+    switchToBoardTab();
+  } else {
+    const newCase = {
+      id: Date.now(),
+      date: todayStr(),
+      roomGroup: currentRoomGroup,
+      originalRoom: form.room,
+      currentRoom: form.room,
+      turn: form.turn,
+      age: form.age,
+      gender: form.gender,
+      dept: form.dept,
+      op: form.op,
+      anes: form.anes,
+      airway: form.airway,
+      monitoring: form.monitoring,
+      medications: form.medications,
+      analgesia: form.analgesia,
+      reminders: form.reminders,
+      hx: form.hx,
+      data: form.data,
+      memo: form.memo,
+      status: '待手術',
+      createdAt: Date.now()
+    };
+    list.push(newCase);
+    savePatients(list);
+    cloudWriteCase(newCase);
+    resetForm();
+    alert('R' + newCase.currentRoom + (newCase.turn ? '｜' + newCase.turn : '') + ' 新增成功！');
+  }
+}
+
+function resetForm() {
+  document.getElementById('age-input').value = '';
+  document.getElementById('memo-input').value = '';
+  document.getElementById('turn-custom').value = '';
+  document.getElementById('turn-custom').style.display = 'none';
+  document.querySelectorAll('#input-page .btn-opt').forEach(b => b.classList.remove('selected'));
+  document.getElementById('field-op').innerHTML = '<div class="op-placeholder">💡 請先點選上方「科別」</div>';
+  selectBtn('anes', 'GA');
+  ['lma','nke','nasal','hfnc','bis','cvp','propofol-tci','remi-tci','nimbex','anectine','levophed','ketamine','droperidol','etomidate','nb','testing','spinal','dynastat','acetamol','epca','ivpca'].forEach(k => {
+    const el = document.getElementById('chk-' + k);
+    if (el) el.checked = false;
+    const card = document.getElementById('card-' + k);
+    if (card) card.classList.remove('on');
+  });
+  ['nb-ropi','nb-deca','nb-epi','nb-dilute','nb-count','t-lido','t-dilute','t-count','nb-type-custom'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  const nbCustom = document.getElementById('nb-type-custom');
+  if (nbCustom) nbCustom.style.display = 'none';
+  hidePresetHint();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function cancelEdit() {
+  editingId = null;
+  document.getElementById('submit-btn').textContent = '送出到看板';
+  document.getElementById('cancel-edit-btn').style.display = 'none';
+  resetForm();
+}
+
+function isStandardTurn(t) {
+  return ['第1台','第2台','第3台','第4台','急診插入'].indexOf(t) >= 0;
+}
+
+function startEdit(id) {
+  const list = loadPatients();
+  const p = list.find(x => x.id === id);
+  if (!p) return;
+  editingId = id;
+  resetForm();
+
+  if (ROOM_GROUPS[currentRoomGroup].rooms.indexOf(p.currentRoom) < 0) {
+    if (p.roomGroup && ROOM_GROUPS[p.roomGroup] && ROOM_GROUPS[p.roomGroup].rooms.indexOf(p.currentRoom) >= 0) {
+      currentRoomGroup = p.roomGroup;
+    } else {
+      currentRoomGroup = 'duty';
+    }
+    saveRoomGroup(currentRoomGroup);
+    renderGroupBar();
+  }
+  renderRoomButtons();
+  selectBtn('room', p.currentRoom);
+
+  if (isStandardTurn(p.turn)) {
+    selectBtn('turn', p.turn);
+  } else if (p.turn) {
+    selectBtn('turn', '其他');
+    const custom = document.getElementById('turn-custom');
+    custom.style.display = 'inline-block';
+    custom.value = p.turn;
+  }
+
+  document.getElementById('age-input').value = p.age || '';
+  selectBtn('gender', p.gender);
+
+  if (p.dept) {
+    selectBtn('dept', p.dept);
+    updateOpButtons(p.dept);
+    if (p.op) {
+      const matched = (OP_MAPPING[p.dept] || []).indexOf(p.op) >= 0;
+      if (matched) selectBtn('op', p.op);
+      else {
+        const customOp = document.getElementById('custom-op');
+        if (customOp) customOp.value = p.op;
+      }
+    }
+  }
+  selectBtn('anes', p.anes);
+
+  if (p.airway) {
+    if (p.airway.lma) { document.getElementById('chk-lma').checked = true; document.getElementById('card-lma').classList.add('on'); }
+    if (p.airway.nonKinkingEndo) { document.getElementById('chk-nke').checked = true; document.getElementById('card-nke').classList.add('on'); }
+    if (p.airway.nasalTube) { document.getElementById('chk-nasal').checked = true; document.getElementById('card-nasal').classList.add('on'); }
+    if (p.airway.hfnc) { document.getElementById('chk-hfnc').checked = true; document.getElementById('card-hfnc').classList.add('on'); }
+  }
+  if (p.monitoring) {
+    if (p.monitoring.bis) { document.getElementById('chk-bis').checked = true; document.getElementById('card-bis').classList.add('on'); }
+    if (p.monitoring.cvpKit) { document.getElementById('chk-cvp').checked = true; document.getElementById('card-cvp').classList.add('on'); }
+  }
+  const meds = p.medications || {};
+  const medMap = [['propofol-tci','propofolTci'],['remi-tci','remiTci'],['nimbex','nimbex'],['anectine','anectine'],['levophed','levophed'],['ketamine','ketamine'],['droperidol','droperidol'],['etomidate','etomidate']];
+  medMap.forEach(pair => {
+    if (meds[pair[1]]) {
+      document.getElementById('chk-' + pair[0]).checked = true;
+      document.getElementById('card-' + pair[0]).classList.add('on');
+    }
+  });
+
+  const a = p.analgesia || {};
+  if (a.nerveBlock && a.nerveBlock.enabled) {
+    document.getElementById('chk-nb').checked = true;
+    document.getElementById('card-nb').classList.add('on');
+    if (a.nerveBlock.blockType) {
+      if (BLOCK_TYPES.indexOf(a.nerveBlock.blockType) >= 0) {
+        selectBtn('nb-type', a.nerveBlock.blockType);
+        if (a.nerveBlock.blockType === '其他') {
+          document.getElementById('nb-type-custom').style.display = 'inline-block';
+        }
+      } else {
+        selectBtn('nb-type', '其他');
+        const nbc = document.getElementById('nb-type-custom');
+        nbc.style.display = 'inline-block';
+        nbc.value = a.nerveBlock.blockType;
+      }
+    }
+    const ps = a.nerveBlock.perSyringe || {};
+    document.getElementById('nb-ropi').value = ps.ropivacaineMl || '';
+    document.getElementById('nb-deca').value = ps.decadronMl || '';
+    document.getElementById('nb-epi').value = ps.epinephrineMl || '';
+    if (ps.diluentType) selectBtn('nb-diluent', ps.diluentType);
+    document.getElementById('nb-dilute').value = ps.diluteToMl || '';
+    document.getElementById('nb-count').value = a.nerveBlock.syringeCount || '';
+  }
+  if (a.testing && a.testing.enabled) {
+    document.getElementById('chk-testing').checked = true;
+    document.getElementById('card-testing').classList.add('on');
+    const ps = a.testing.perSyringe || {};
+    document.getElementById('t-lido').value = ps.lidocaineMl || '';
+    if (ps.diluentType) selectBtn('t-diluent', ps.diluentType);
+    document.getElementById('t-dilute').value = ps.diluteToMl || '';
+    document.getElementById('t-count').value = a.testing.syringeCount || '';
+  }
+  const simple = [['spinal','spinalMorphine'],['dynastat','dynastat'],['acetamol','acetamol'],['epca','epiduralPCA'],['ivpca','ivpca']];
+  simple.forEach(pair => {
+    if (a[pair[1]]) {
+      document.getElementById('chk-' + pair[0]).checked = true;
+      document.getElementById('card-' + pair[0]).classList.add('on');
+    }
+  });
+
+  (p.reminders || []).forEach(r => selectBtnMulti('reminder', r));
+  (p.hx || []).forEach(r => selectBtnMulti('hx', r));
+  (p.data || []).forEach(r => selectBtnMulti('data', r));
+  document.getElementById('memo-input').value = p.memo || '';
+
+  document.getElementById('submit-btn').textContent = '更新此 case';
+  document.getElementById('cancel-edit-btn').style.display = 'block';
+
+  document.querySelectorAll('.page').forEach(pg => pg.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('input-page').classList.add('active');
+  document.getElementById('nav-input').classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderBoard() {
+  const container = document.getElementById('board-container');
+  container.innerHTML = '';
+  const all = loadPatients();
+  if (!all.length) {
+    const tip = document.createElement('div');
+    tip.className = 'empty-tip';
+    tip.textContent = '📭 目前尚無 case 資料';
+    container.appendChild(tip);
+    return;
+  }
+  const allowedRooms = ROOM_GROUPS[currentRoomGroup].rooms;
+  const activeRooms = allowedRooms.filter(r => all.some(p => p.currentRoom === r));
+  if (!activeRooms.length) {
+    const tip = document.createElement('div');
+    tip.className = 'empty-tip';
+    tip.textContent = '📭 ' + ROOM_GROUPS[currentRoomGroup].label + ' 目前無 case';
+    container.appendChild(tip);
+    return;
+  }
+  const TURN_SORT = ['第1台','第2台','第3台','第4台','急診插入'];
+  function turnSortKey(t) {
+    const i = TURN_SORT.indexOf(t);
+    return i === -1 ? 99 : i;
+  }
+  // 狀態優先：手術中 → 待手術 → 已完成
+  const STATUS_SORT = { '手術中': 0, '待手術': 1, '已完成': 2 };
+  function statusSortKey(s) {
+    return (s in STATUS_SORT) ? STATUS_SORT[s] : 1;
+  }
+  activeRooms.forEach(roomNum => {
+    const cases = all.filter(p => p.currentRoom === roomNum);
+    cases.sort((a,b) => {
+      const sa = statusSortKey(a.status), sb = statusSortKey(b.status);
+      if (sa !== sb) return sa - sb;
+      const ka = turnSortKey(a.turn), kb = turnSortKey(b.turn);
+      if (ka !== kb) return ka - kb;
+      return (a.createdAt || a.id) - (b.createdAt || b.id);
+    });
+    const block = document.createElement('div');
+    block.className = 'room-block';
+    const title = document.createElement('div');
+    title.className = 'room-title';
+    const tNum = document.createElement('span');
+    tNum.textContent = 'Room ' + roomNum;
+    title.appendChild(tNum);
+    const tCount = document.createElement('span');
+    tCount.className = 'count';
+    tCount.textContent = '（' + cases.length + ' case）';
+    title.appendChild(tCount);
+    block.appendChild(title);
+    cases.forEach(c => block.appendChild(renderCase(c)));
+    container.appendChild(block);
+  });
+}
+
+function renderCase(p) {
+  const card = document.createElement('div');
+  card.className = 'case-card';
+
+  const head = document.createElement('div');
+  head.className = 'case-head';
+  const statusKey = p.status === '手術中' ? 'current' : (p.status === '已完成' ? 'done' : 'wait');
+  const badge = document.createElement('button');
+  badge.type = 'button';
+  badge.className = 'badge ' + statusKey;
+  badge.textContent = p.status || '待手術';
+  badge.title = '點擊切換狀態';
+  badge.onclick = () => cycleStatus(p.id);
+  head.appendChild(badge);
+
+  const headline = document.createElement('div');
+  headline.className = 'case-headline';
+  const headParts = [];
+  if (p.turn) headParts.push(p.turn);
+  if (p.dept) headParts.push(p.dept);
+  if (p.op) headParts.push(p.op);
+  if (p.anes) headParts.push(p.anes);
+  const ag = (p.age ? p.age + 'y' : '') + (p.gender || '');
+  if (ag) headParts.push(ag);
+  headline.textContent = headParts.join('｜') || '（未填）';
+  head.appendChild(headline);
+  card.appendChild(head);
+
+  if (p.originalRoom && p.originalRoom !== p.currentRoom) {
+    const jump = document.createElement('div');
+    jump.className = 'room-jump';
+    jump.textContent = '⚠️ 跳房：R' + p.originalRoom + ' → R' + p.currentRoom;
+    card.appendChild(jump);
+  }
+
+  const prepLines = buildPrepLines(p);
+  if (prepLines.length) {
+    const prep = document.createElement('div');
+    prep.className = 'prep-block';
+    prep.textContent = prepLines.join('\n');
+    card.appendChild(prep);
+  }
+
+  if (p.reminders && p.reminders.length) {
+    const r = document.createElement('div');
+    r.className = 'reminders';
+    r.textContent = '⚠️ ' + p.reminders.join('、');
+    if (p.reminders.indexOf('未麻訪') >= 0) {
+      const clr = document.createElement('button');
+      clr.type = 'button';
+      clr.className = 'anes-clear';
+      clr.textContent = '✓ 已評估';
+      clr.onclick = () => clearAnesReview(p.id);
+      r.appendChild(clr);
+    }
+    card.appendChild(r);
+  }
+
+  if ((p.hx && p.hx.length) || (p.data && p.data.length)) {
+    const row = document.createElement('div');
+    row.className = 'hxdata';
+    if (p.hx && p.hx.length) {
+      const pill = document.createElement('button');
+      pill.type = 'button';
+      pill.className = 'hxdata-pill' + (expandedHx.has(p.id) ? ' open' : '');
+      pill.textContent = (expandedHx.has(p.id) ? '▾' : '▸') + ' Hx (' + p.hx.length + ')';
+      pill.onclick = () => {
+        if (expandedHx.has(p.id)) expandedHx.delete(p.id); else expandedHx.add(p.id);
+        renderBoard();
+      };
+      row.appendChild(pill);
+    }
+    if (p.data && p.data.length) {
+      const pill = document.createElement('button');
+      pill.type = 'button';
+      pill.className = 'hxdata-pill' + (expandedData.has(p.id) ? ' open' : '');
+      pill.textContent = (expandedData.has(p.id) ? '▾' : '▸') + ' Data (' + p.data.length + ')';
+      pill.onclick = () => {
+        if (expandedData.has(p.id)) expandedData.delete(p.id); else expandedData.add(p.id);
+        renderBoard();
+      };
+      row.appendChild(pill);
+    }
+    card.appendChild(row);
+
+    if (expandedHx.has(p.id) && p.hx && p.hx.length) {
+      const d = document.createElement('div');
+      d.className = 'hxdata-detail';
+      d.textContent = 'Hx：' + p.hx.join('、');
+      card.appendChild(d);
+    }
+    if (expandedData.has(p.id) && p.data && p.data.length) {
+      const d = document.createElement('div');
+      d.className = 'hxdata-detail';
+      d.textContent = 'Data：' + p.data.join('、');
+      card.appendChild(d);
+    }
+  }
+
+  if (p.memo) {
+    const m = document.createElement('div');
+    m.className = 'memo-show';
+    m.textContent = '✍ ' + p.memo;
+    card.appendChild(m);
+  }
+
+  const actions = document.createElement('div');
+  actions.className = 'case-actions';
+  if (p.status === '待手術') {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'primary';
+    b.textContent = '▶ 進入';
+    b.onclick = () => setStatus(p.id, '手術中');
+    actions.appendChild(b);
+  }
+  if (p.status === '手術中') {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'ok';
+    b.textContent = '✓ 完成';
+    b.onclick = () => setStatus(p.id, '已完成');
+    actions.appendChild(b);
+  }
+  const jump = document.createElement('button');
+  jump.type = 'button';
+  jump.textContent = '🔀 跳房';
+  jump.onclick = () => openRoomChange(p.id);
+  actions.appendChild(jump);
+  const ed = document.createElement('button');
+  ed.type = 'button';
+  ed.textContent = '✎ 編輯';
+  ed.onclick = () => startEdit(p.id);
+  actions.appendChild(ed);
+  const del = document.createElement('button');
+  del.type = 'button';
+  del.className = 'warn';
+  del.textContent = '刪除';
+  del.onclick = () => { if (confirm('確定刪除此 case？')) deleteCase(p.id); };
+  actions.appendChild(del);
+  card.appendChild(actions);
+
+  return card;
+}
+
+function buildPrepLines(p) {
+  const lines = [];
+  const a = p.analgesia || {};
+
+  if (p.airway) {
+    const aw = [];
+    if (p.airway.lma) aw.push('LMA');
+    if (p.airway.nonKinkingEndo) aw.push('Non-kinking endo');
+    if (p.airway.nasalTube) aw.push('鼻管');
+    if (p.airway.hfnc) aw.push('HFNC');
+    if (aw.length) lines.push('Airway：' + aw.join('、'));
+  }
+  if (p.monitoring) {
+    const mo = [];
+    if (p.monitoring.bis) mo.push('BIS');
+    if (p.monitoring.cvpKit) mo.push('CVP kit');
+    if (mo.length) lines.push('Monitoring：' + mo.join('、'));
+  }
+  if (p.medications) {
+    const md = [];
+    if (p.medications.propofolTci) md.push('Propofol TCI');
+    if (p.medications.remiTci) md.push('Remifentanil TCI');
+    if (p.medications.nimbex) md.push('Nimbex');
+    if (p.medications.anectine) md.push('Anectine');
+    if (p.medications.levophed) md.push('Levophed 10mcg/ml');
+    if (p.medications.ketamine) md.push('Ketamine');
+    if (p.medications.droperidol) md.push('Droperidol');
+    if (p.medications.etomidate) md.push('Etomidate');
+    if (md.length) lines.push('備藥：' + md.join('、'));
+  }
+
+  if (a.nerveBlock && a.nerveBlock.enabled) {
+    const nb = a.nerveBlock;
+    lines.push(nb.blockType ? ('NB：' + nb.blockType + ' block') : 'NB');
+    const ps = nb.perSyringe || {};
+    const drugs = [];
+    if (ps.ropivacaineMl) drugs.push('Ropivacaine ' + ps.ropivacaineMl + ' ml');
+    if (ps.decadronMl) drugs.push('Decadron ' + ps.decadronMl + ' ml');
+    if (ps.epinephrineMl) drugs.push('Epinephrine ' + ps.epinephrineMl + ' ml');
+    if (drugs.length) lines.push(drugs.join(' + '));
+    const parts = [];
+    if (ps.diluentType && ps.diluteToMl) parts.push('用 ' + ps.diluentType + ' 稀釋至 ' + ps.diluteToMl + ' ml');
+    else if (ps.diluteToMl) parts.push('稀釋至 ' + ps.diluteToMl + ' ml');
+    else if (ps.diluentType) parts.push('用 ' + ps.diluentType + ' 稀釋');
+    if (nb.syringeCount) parts.push('抽 ' + nb.syringeCount + ' 隻');
+    if (parts.length) lines.push(parts.join('，'));
+  }
+
+  if (a.testing && a.testing.enabled) {
+    const t = a.testing;
+    const ps = t.perSyringe || {};
+    lines.push('Testing：');
+    if (ps.lidocaineMl) lines.push('Lidocaine ' + ps.lidocaineMl + ' ml');
+    const parts = [];
+    if (ps.diluentType && ps.diluteToMl) parts.push('用 ' + ps.diluentType + ' 稀釋至 ' + ps.diluteToMl + ' ml');
+    else if (ps.diluteToMl) parts.push('稀釋至 ' + ps.diluteToMl + ' ml');
+    else if (ps.diluentType) parts.push('用 ' + ps.diluentType + ' 稀釋');
+    if (t.syringeCount) parts.push('抽 ' + t.syringeCount + ' 隻');
+    if (parts.length) lines.push(parts.join('，'));
+  }
+
+  if (a.spinalMorphine) lines.push('Spinal morphine');
+
+  const pcaItems = [];
+  if (a.epiduralPCA) pcaItems.push('Epidural PCA');
+  if (a.ivpca) pcaItems.push('IVPCA');
+  if (pcaItems.length) lines.push('PCA：' + pcaItems.join('、'));
+
+  const sysItems = [];
+  if (a.dynastat) sysItems.push('Dynastat');
+  if (a.acetamol) sysItems.push('Acetamol');
+  if (sysItems.length) lines.push('Systemic analgesics：' + sysItems.join('、'));
+
+  return lines;
+}
+
+function cycleStatus(id) {
+  const list = loadPatients();
+  const idx = list.findIndex(p => p.id === id);
+  if (idx < 0) return;
+  const cur = list[idx].status || '待手術';
+  const ni = (STATUS_ORDER.indexOf(cur) + 1) % STATUS_ORDER.length;
+  list[idx].status = STATUS_ORDER[ni];
+  savePatients(list);
+  cloudWriteCase(list[idx]);
+  renderBoard();
+}
+function setStatus(id, s) {
+  const list = loadPatients();
+  const idx = list.findIndex(p => p.id === id);
+  if (idx >= 0) {
+    list[idx].status = s;
+    savePatients(list);
+    cloudWriteCase(list[idx]);
+    renderBoard();
+  }
+}
+function deleteCase(id) {
+  const list = loadPatients().filter(p => p.id !== id);
+  savePatients(list);
+  cloudDeleteCase(id);
+  expandedHx.delete(id); expandedData.delete(id);
+  renderBoard();
+}
+function clearAnesReview(id) {
+  const list = loadPatients();
+  const idx = list.findIndex(p => p.id === id);
+  if (idx >= 0) {
+    list[idx].reminders = (list[idx].reminders || []).filter(r => r !== '未麻訪');
+    savePatients(list);
+    cloudWriteCase(list[idx]);
+    renderBoard();
+  }
+}
+
+function openRoomChange(id) {
+  pendingRoomChangeId = id;
+  const list = loadPatients();
+  const p = list.find(x => x.id === id);
+  const grid = document.getElementById('room-change-grid');
+  grid.innerHTML = '';
+  const allowed = new Set(ROOM_GROUPS[currentRoomGroup].rooms);
+  if (p && p.originalRoom) allowed.add(p.originalRoom);
+  if (p && p.currentRoom) allowed.add(p.currentRoom);
+  const rooms = Array.from(allowed).sort((a,b) => Number(a) - Number(b));
+  rooms.forEach(r => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = 'R' + r;
+    if (p && r === p.currentRoom) btn.classList.add('current');
+    btn.onclick = () => doRoomChange(r);
+    grid.appendChild(btn);
+  });
+  document.getElementById('room-change-modal').classList.add('show');
+}
+function closeRoomChange() {
+  pendingRoomChangeId = null;
+  document.getElementById('room-change-modal').classList.remove('show');
+}
+function doRoomChange(newRoom) {
+  if (pendingRoomChangeId == null) return;
+  const list = loadPatients();
+  const idx = list.findIndex(p => p.id === pendingRoomChangeId);
+  if (idx >= 0) {
+    list[idx].currentRoom = newRoom;
+    savePatients(list);
+    cloudWriteCase(list[idx]);
+  }
+  closeRoomChange();
+  renderBoard();
+}
+
+function switchPage(pageId, navBtn) {
+  document.querySelectorAll('.page').forEach(pg => pg.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(pageId).classList.add('active');
+  navBtn.classList.add('active');
+}
+function switchToBoardTab() {
+  document.querySelectorAll('.page').forEach(pg => pg.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('board-page').classList.add('active');
+  document.getElementById('nav-board').classList.add('active');
+  renderBoard();
+}
+
+function resetAll() {
+  if (!confirm('確定清除今日全部資料？（雲端與所有裝置都會清除）')) return;
+  localStorage.removeItem(STORAGE_KEYS.patients);
+  localStorage.setItem(STORAGE_KEYS.dataDate, todayStr());
+  expandedHx.clear(); expandedData.clear();
+  cloudPurgeAll();
+  renderBoard();
+}
+
+function csvCell(v) {
+  if (v == null) v = '';
+  v = String(v);
+  if (/[",\n\r]/.test(v)) v = '"' + v.replace(/"/g, '""') + '"';
+  return v;
+}
+function buildNBPerSyringe(nb) {
+  const ps = (nb && nb.perSyringe) || {};
+  const drugs = [];
+  if (ps.ropivacaineMl) drugs.push('Ropivacaine ' + ps.ropivacaineMl + ' ml');
+  if (ps.decadronMl) drugs.push('Decadron ' + ps.decadronMl + ' ml');
+  if (ps.epinephrineMl) drugs.push('Epinephrine ' + ps.epinephrineMl + ' ml');
+  return drugs.join(' + ');
+}
+function buildTestingSummary(t) {
+  if (!t || !t.enabled) return '';
+  const ps = t.perSyringe || {};
+  const parts = [];
+  if (ps.lidocaineMl) parts.push('Lidocaine ' + ps.lidocaineMl + ' ml');
+  if (ps.diluentType && ps.diluteToMl) parts.push('用 ' + ps.diluentType + ' 稀釋至 ' + ps.diluteToMl + ' ml');
+  if (t.syringeCount) parts.push('抽 ' + t.syringeCount + ' 隻');
+  return parts.join('，');
+}
+
+function exportCSV() {
+  const list = loadPatients();
+  if (!list.length) { alert('沒有資料可匯出'); return; }
+  const headers = ['日期','班別','原房','目前房','第幾台','年齡','性別','科別','術式','麻醉方式','Airway 備物','Monitoring 備物','備藥','止痛備物摘要','NB block type','NB 每隻配方','NB 稀釋液','NB 每隻稀釋至 ml','NB 抽幾隻','Testing 摘要','Spinal morphine','Dynastat','Acetamol','Epidural PCA','IVPCA','特殊提醒','Hx','Data','備註','手術狀態'];
+  let csv = '﻿' + headers.map(csvCell).join(',') + '\n';
+  list.forEach(p => {
+    const a = p.analgesia || {};
+    const nb = a.nerveBlock || {};
+    const summary = buildPrepLines(p).join(' ｜ ');
+    const row = [
+      p.date || todayStr(),
+      (ROOM_GROUPS[p.roomGroup] && ROOM_GROUPS[p.roomGroup].label) || p.roomGroup || '',
+      p.originalRoom || '',
+      p.currentRoom || '',
+      p.turn || '',
+      p.age || '',
+      p.gender || '',
+      p.dept || '',
+      p.op || '',
+      p.anes || '',
+      (function(){
+        const aw=[]; if(p.airway){ if(p.airway.lma)aw.push('LMA'); if(p.airway.nonKinkingEndo)aw.push('Non-kinking endo'); if(p.airway.nasalTube)aw.push('鼻管'); if(p.airway.hfnc)aw.push('HFNC'); }
+        return aw.join('；');
+      })(),
+      (function(){
+        const mo=[]; if(p.monitoring){ if(p.monitoring.bis)mo.push('BIS'); if(p.monitoring.cvpKit)mo.push('CVP kit'); }
+        return mo.join('；');
+      })(),
+      (function(){
+        const md=[]; const m=p.medications||{};
+        if(m.propofolTci)md.push('Propofol TCI');
+        if(m.remiTci)md.push('Remifentanil TCI');
+        if(m.nimbex)md.push('Nimbex');
+        if(m.anectine)md.push('Anectine');
+        if(m.levophed)md.push('Levophed 10mcg/ml');
+        if(m.ketamine)md.push('Ketamine');
+        if(m.droperidol)md.push('Droperidol');
+        if(m.etomidate)md.push('Etomidate');
+        return md.join('；');
+      })(),
+      summary,
+      nb.enabled ? (nb.blockType || '') : '',
+      nb.enabled ? buildNBPerSyringe(nb) : '',
+      nb.enabled ? ((nb.perSyringe && nb.perSyringe.diluentType) || '') : '',
+      nb.enabled ? ((nb.perSyringe && nb.perSyringe.diluteToMl) || '') : '',
+      nb.enabled ? (nb.syringeCount || '') : '',
+      buildTestingSummary(a.testing),
+      a.spinalMorphine ? 'V' : '',
+      a.dynastat ? 'V' : '',
+      a.acetamol ? 'V' : '',
+      a.epiduralPCA ? 'V' : '',
+      a.ivpca ? 'V' : '',
+      (p.reminders || []).join('；'),
+      (p.hx || []).join('；'),
+      (p.data || []).join('；'),
+      (p.memo || '').replace(/\r?\n/g, ' '),
+      p.status || ''
+    ].map(csvCell).join(',');
+    csv += row + '\n';
+  });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = '麻醉備物_' + todayStr() + '.csv';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+window.switchPage = switchPage;
+window.exportCSV = exportCSV;
+window.resetAll = resetAll;
+window.submitPatient = submitPatient;
+window.cancelEdit = cancelEdit;
+window.closeRoomChange = closeRoomChange;
+window.renderBoard = renderBoard;
+
+checkAndPurgeStaleData();
+renderGroupBar();
+initInputPage();
+startCloudSubscribe();
+scheduleNightlyPurge();
+</script>
+</body>
+</html>
