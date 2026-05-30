@@ -28,8 +28,9 @@
 ```
 C:\Users\jenni\我的雲端硬碟\AI\手術動態看板\
 ├── 麻醉備物溝通看板.html       ← 麻醫完整版（主程式，Firebase SDK + websocket 即時同步）
-├── 麻醉備物溝通看板-本機版.html ← 本機離線版（自給自足，雙擊即開，REST + 3 秒輪詢同步）
-├── _build_local.py             ← 由主程式產生本機版的 build 腳本（改完主程式重跑即可）
+├── 麻醉備物溝通看板-本機版.html ← 麻醫完整版的本機離線版（自給自足，雙擊即開，REST + 3 秒輪詢同步）
+├── 護理師看板-本機版.html       ← 護理師大字體看板的本機離線版（同上機制，由 board/index.html 產生）
+├── _build_local.py             ← 由主程式 + board 產生兩份本機版的 build 腳本（改完重跑即可）
 ├── index.html                  ← GitHub Pages 入口（meta-refresh 到主程式）
 ├── netlify.toml                ← Netlify 部署設定（含 / → 主程式 rewrite）
 ├── board/
@@ -257,8 +258,9 @@ push 完：
 ⚠️ 不要建 PR，user 是單人開發，直接 push main。
 
 ### 本機離線版怎麼維護
-- `麻醉備物溝通看板-本機版.html` 是**自動產生的**，不要手改。改完主程式 `麻醉備物溝通看板.html` 後，
-  跑 `python _build_local.py` 重新產生即可（會把 gstatic SDK import 換成 REST + 輪詢那段，其餘原樣複製）。
+- `麻醉備物溝通看板-本機版.html`（麻醫版）與 `護理師看板-本機版.html`（護理師大字體版）都是**自動產生的**，
+  不要手改。改完主程式 `麻醉備物溝通看板.html` 或 `board/index.html` 後，跑 `python _build_local.py`
+  會一次重新產生兩份（把 gstatic SDK import 換成 REST + 輪詢那段，其餘原樣複製）。
 - 背景：彰化秀傳部分 OR 電腦是「白名單網路」，連 `netlify.app`、`firebasedatabase.app`、一般外網全擋，
   只有 `gstatic.com` 在白名單。所以網頁版在那些電腦**整頁載不出來**。本機版把載入做成自給自足
   （不靠 netlify、也不靠 gstatic SDK），雙擊就能開畫面；同步改用 Firebase RTDB 的 **REST API + 每 3 秒輪詢**
