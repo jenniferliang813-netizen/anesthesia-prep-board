@@ -111,13 +111,24 @@ C:\Users\jenni\我的雲端硬碟\AI\手術動態看板\
   airway: {
     lma: true,
     nonKinkingEndo: false,
-    nasalTube: false
+    nasalTube: false,
+    hfnc: false                    // 2026-05-30 新增
   },
-  monitoring: { bis: true },
+  monitoring: { bis: true, cvpKit: false },   // cvpKit 2026-05-30 新增
+  medications: {                   // 2026-05-30 新增「備藥」區塊
+    propofolTci: false,
+    remiTci: false,
+    nimbex: false,
+    anectine: false,
+    levophed: false,               // Levophed 10mcg/ml
+    ketamine: false,
+    droperidol: false,
+    etomidate: false
+  },
   analgesia: {
     nerveBlock: {
       enabled: true,
-      blockType: "ESP",            // ESP/TAP/PENG/FIB/ACB/DSB/PECS/CCB/SCB/superior trunk/QL/ITP/FTB/popliteal/Caudal/其他
+      blockType: "ESP",            // 選「其他」時可手動自填任意字串（blockType 會存自填值）
       perSyringe: {
         ropivacaineMl: "5",
         decadronMl: "1",
@@ -142,9 +153,9 @@ C:\Users\jenni\我的雲端硬碟\AI\手術動態看板\
     epiduralPCA: false,
     ivpca: true
   },
-  reminders: ["需 A-line", "需 DLT", "ICU postop"],
+  reminders: ["需 A-line", "需 DLT", "Post OP ICU"],
   hx: ["HTN", "DM"],
-  data: ["Hb < 10"],
+  data: ["CXR ok"],
   memo: "...",                     // ≤80 字
   status: "手術中",                 // 待手術 / 手術中 / 已完成
   createdAt: 1717033200000
@@ -166,27 +177,48 @@ ROOM_GROUPS = {
 
 OP_MAPPING = {
   Ortho → ENT → NS → CS → CVS → GYN → GU → PS → OS → GS → CRS → BS → OPH
-}  // 這個排序是使用者明確要求，動的時候確認
+}  // 科別排序是使用者明確要求，動的時候確認
+   // 2026-05-30 術式內容調整：
+   //   Ortho 刪 ROI、加 PELD/L-spine/C-spine
+   //   ENT  tumor→tumor excision、加 LN biopsy
+   //   CS   Wedge/Rib fracture 置最前、加 tracheostomy/PP window
+   //   GYN  TCR→子宮鏡、staging→Open Debulking/Laparoscopic Staging
+   //   CRS  Rt hemi→Hemicolectomy、加 AR
+   //   BS   砍 BCS/Mastectomy → Partial mastectomy/MRM
 
-OP_PRESETS = {  // 選了術式自動勾選對應的特殊提醒
-  'Lobectomy': ['需 A-line', '需 DLT', 'ICU postop'],
-  'Esophagectomy': ['需 A-line', '需 DLT', '需粗 line', 'ICU postop'],
+OP_PRESETS = {  // 選了術式自動勾選對應的特殊提醒（隱形預帶，不彈窗）
+  'Lobectomy': ['需 A-line', '需 DLT', 'Post OP ICU'],
+  'Esophagectomy': ['需 A-line', '需 DLT', '需粗 line', 'Post OP ICU'],
   '切肝': ['需 A-line', '需 CVC'],
+  'Open Debulking': ['需 A-line', '需 CVC'],          // 2026-05-30 新增
+  'Laparoscopic Staging': ['需 A-line', '需 CVC'],     // 2026-05-30 新增
   // ... 約 15 項
 }
+// 2026-05-30 移除的預帶路徑：Rib fracture(DLT)、食道擴張、Varicose、
+//   TEVAR/AAA(粗 line)、AV shunt(A-line/粗 line)；CVS 一律不再預勾 DLT
 
-REMINDER_LIST = ['高風險','尚未麻評','需回問','困難 airway','需 A-line','需 CVC','需 DLT','需 VL','需 FOB','需粗 line','ICU postop','術後呼吸器']
+REMINDER_LIST = ['高風險','未麻訪','Awake 插管','需 FOB','需 DLT','需 A-line','需粗 line','需 CVC','術後呼吸器','Post OP ICU']
+// 2026-05-30 重新分類排序：高風險/未麻訪 → 呼吸道(Awake插管/FOB/DLT) → 線路(A-line/粗line/CVC) → 術後(呼吸器/ICU)
+// 刪除：需回問、困難 airway、需 VL；「尚未麻評」改名「未麻訪」；「ICU postop」改名「Post OP ICU」
 
 BLOCK_TYPES = ['ESP','TAP','PENG','FIB','ACB','DSB','PECS','CCB','SCB','superior trunk','QL','ITP','FTB','popliteal','Caudal','其他']
+// 選「其他」會跳出自填輸入框（nb-type-custom），blockType 存自填字串
 
 DILUENTS = ['Normal saline','D5W']
 
 STATUS_ORDER = ['待手術','手術中','已完成']
+
+MEDICATIONS（備藥區，2026-05-30 新增）= Propofol TCI / Remifentanil TCI / Nimbex /
+  Anectine / Levophed 10mcg/ml / Ketamine / Droperidol / Etomidate
+AIRWAY 新增 HFNC；MONITORING 新增 CVP kit
+
+DATA_LIST 2026-05-30 重排：判讀類(CXR/EKG/echo)置前、抽血類置後
 ```
 
 ### 跨欄位連動規則
-- 勾「困難 airway」→ 自動補勾「需 FOB」（可手動取消）
+- ~~勾「困難 airway」→ 自動補勾「需 FOB」~~（2026-05-30 已移除，困難 airway 選項也砍了）
 - 術式選了 → 套用 OP_PRESETS 預帶（隱形，不彈窗）
+- NB block type 選「其他」→ 顯示自填輸入框
 
 ---
 
@@ -233,8 +265,12 @@ push 完：
 5. **Firebase 雲端同步**：手動建 Firebase project，加 Realtime DB sync，原 localStorage 改為快取
 6. **護理師看板分頁**：建 `board/index.html`，唯讀但可改狀態 + 跳房
 7. **Netlify 部署**：醫院封 github.io，user 確認可開 netlify.app，遷移
-8. **移除語音**：辨識不準，user 決定砍掉（**this commit**）
-9. **排序加 status 優先**：看板手術中 → 待手術 → 已完成（**this commit**）
+8. **移除語音**：辨識不準，user 決定砍掉
+9. **排序加 status 優先**：看板手術中 → 待手術 → 已完成
+10. **術式與備物大更新（2026-05-30）**：六科術式清單調整、OP_PRESETS 移除多條預帶路徑、
+    特殊提醒重新分類（刪困難airway/需回問/需VL，尚未麻評→未麻訪，加 Awake 插管）、
+    Data 判讀類置前、Airway 加 HFNC、Monitoring 加 CVP kit、新增備藥區 8 項、
+    NB「其他」可自填、ICU postop→Post OP ICU。主檔/看板/CSV 全同步（**this commit**）
 
 ---
 
