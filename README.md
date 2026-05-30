@@ -25,24 +25,24 @@
 
 1. 上方點「白班前段」/「白班後段」/「值班」切換房間範圍
 2. 點 Room → 第幾台 → 科別 → 術式
-3. 試試選 **CS → Lobectomy**，看看「特殊提醒」是不是自動帶入 `需 A-line`、`需 DLT`、`ICU postop`
-4. 勾「困難 airway」，看看是不是自動連動勾「需 FOB」
-5. 試試開 Nerve block，填配方、稀釋液、抽幾隻
-6. 按「送出到看板」→ 切到「📊 看板」分頁，看臨床語句呈現
-7. 卡片上可一鍵切狀態、跳房、編輯、刪除
+3. 試試選 **CS → Lobectomy**，看看「特殊提醒」是不是自動帶入 `需 A-line`、`需 DLT`、`Post OP ICU`
+4. 試試開 Nerve block，填配方、稀釋液、抽幾隻（block type 選「其他」可自填）
+5. 按「送出到看板」→ 切到「📊 看板」分頁，看臨床語句呈現
+6. 卡片上可一鍵切狀態、跳房、編輯、刪除
 
 ## 💡 已實作功能
 
 - 班別篩選（白班前段 / 白班後段 / 值班），記憶最後選擇
 - Room / 第幾台 / 年齡性別 / 科別術式 / 麻醉方式
-- **Airway 備物**：LMA、Non-kinking endo、鼻管
-- **止痛備物**：Nerve block（含每隻配方 / 稀釋液 / 抽幾隻臨床語意）、Testing syringe、Spinal morphine、Dynastat、Acetamol、Epidural PCA、IVPCA
-- **特殊提醒**：高風險、尚未麻評、困難 airway、需 A-line / CVC / DLT / VL / FOB / 粗 line、ICU postop、術後呼吸器
-- **術式自動帶入備物**（隱形預填，不要的可手動點掉）：例如 Lobectomy → A-line + DLT + ICU postop
-- **跨欄位連動**：勾困難 airway → 自動補勾需 FOB
-- Hx、Data 完整保留，看板上預設摺疊
+- **Airway 備物**：LMA、Non-kinking endo、鼻管、HFNC
+- **Monitoring 備物**：BIS、CVP kit
+- **備藥**：Propofol TCI、Remifentanil TCI、Nimbex、Anectine、Levophed 10mcg/ml、Ketamine、Droperidol、Etomidate
+- **止痛備物**：Nerve block（含每隻配方 / 稀釋液 / 抽幾隻臨床語意，block type 可自填）、Testing syringe、Spinal morphine、Dynastat、Acetamol、Epidural PCA、IVPCA
+- **特殊提醒**：高風險、未麻訪、Awake 插管、需 FOB / DLT / A-line / 粗 line / CVC、術後呼吸器、Post OP ICU
+- **術式自動帶入備物**（隱形預填，不要的可手動點掉）：例如 Lobectomy → A-line + DLT + Post OP ICU
+- Hx、Data 完整保留（Data 判讀類在前、抽血類在後），看板上預設摺疊
 - 跳房 modal：`⚠️ R5 → R8`
-- 「✓ 已評估」一鍵清「尚未麻評」
+- 「✓ 已評估」一鍵清「未麻訪」
 - 編輯 = 重開表單預填全部內容
 - CSV 匯出（含全部備物欄位）
 
