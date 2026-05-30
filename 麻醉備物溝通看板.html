@@ -249,42 +249,44 @@ const ROOM_GROUPS = {
 };
 
 const OP_MAPPING = {
-  'Ortho': ['TKR', 'THR', '膝關節鏡', 'RCT', 'radius', 'humerus', 'clavicle', 'femur', 'tibia', 'patella', 'ankle', 'pelvic', 'ROI', '骨水泥'],
-  'ENT':   ['FESS', 'LMS', 'Tympanoplasty', 'Thyroid', 'tumor', 'tonsillectomy'],
+  'Ortho': ['TKR', 'THR', '膝關節鏡', 'RCT', 'radius', 'humerus', 'clavicle', 'femur', 'tibia', 'patella', 'ankle', 'pelvic', 'PELD', 'L-spine', 'C-spine', '骨水泥'],
+  'ENT':   ['FESS', 'LMS', 'Tympanoplasty', 'Thyroid', 'tumor excision', 'LN biopsy', 'tonsillectomy'],
   'NS':    ['Craniotomy', 'L spine', 'C spine', 'VP-shunt', 'RF', '骨水泥', 'brain tumor', 'pituitary tumor', 'ICP monitor'],
-  'CS':    ['Lobectomy', 'wedge', 'segemenctectomy', '食道擴張', 'Esophagectomy', 'rib'],
+  'CS':    ['Wedge', 'Rib fracture', 'Lobectomy', 'segemenctectomy', '食道擴張', 'Esophagectomy', 'tracheostomy', 'PP window'],
   'CVS':   ['CABG', 'AVR', 'MVR', 'AV shunt', 'Varicose', 'TEVAR', 'AAA stent', 'type A', 'perm-cath'],
-  'GYN':   ['TCR', 'ATH', 'LAVH', 'Myomectomy', 'D&C', 'C/S', 'staging', '卵巢手術'],
+  'GYN':   ['子宮鏡', 'ATH', 'LAVH', 'Myomectomy', 'D&C', 'C/S', 'Open Debulking', 'Laparoscopic Staging', '卵巢手術'],
   'GU':    ['TURBT', 'RIRS', 'RRP', '膀胱鏡', 'URSL', 'TURP', 'vasetomy', 'hernia'],
   'PS':    ['Debridement', 'STSG', 'Flap', '整形'],
   'OS':    ['free flap', 'wide excision', 'zygoma fracture', '拔牙'],
   'GS':    ['LC', 'Appen', 'Hernia', '切胃', '切肝', 'port A', 'thyroid', 'parathyroid', 'GI RF'],
-  'CRS':   ['Rt hemi', 'LAR', 'Anal fistula', 'hemorrhoid', '腸造口'],
-  'BS':    ['BCS', 'Mastectomy'],
+  'CRS':   ['Hemicolectomy', 'AR', 'LAR', 'Anal fistula', 'hemorrhoid', '腸造口'],
+  'BS':    ['Partial mastectomy', 'MRM'],
   'OPH':   ['眼科手術']
 };
 
 const OP_PRESETS = {
-  'Lobectomy':       ['需 A-line', '需 DLT', 'ICU postop'],
-  'wedge':           ['需 DLT'],
-  'segemenctectomy': ['需 A-line', '需 DLT'],
-  'Esophagectomy':   ['需 A-line', '需 DLT', '需粗 line', 'ICU postop'],
-  '切肝':            ['需 A-line', '需 CVC'],
-  '切胃':            ['需 A-line'],
-  'CABG':            ['需 A-line', '需 CVC', 'ICU postop', '術後呼吸器'],
-  'AVR':             ['需 A-line', '需 CVC', 'ICU postop', '術後呼吸器'],
-  'MVR':             ['需 A-line', '需 CVC', 'ICU postop', '術後呼吸器'],
-  'Craniotomy':      ['需 A-line', 'ICU postop'],
-  'brain tumor':     ['需 A-line', 'ICU postop'],
-  'pituitary tumor': ['需 A-line'],
-  'LAR':             ['需 A-line'],
-  'Rt hemi':         ['需 A-line'],
-  'free flap':       ['需 A-line', '需 CVC']
+  'Lobectomy':            ['需 A-line', '需 DLT', 'Post OP ICU'],
+  'Wedge':                ['需 DLT'],
+  'segemenctectomy':      ['需 A-line', '需 DLT'],
+  'Esophagectomy':        ['需 A-line', '需 DLT', '需粗 line', 'Post OP ICU'],
+  '切肝':                 ['需 A-line', '需 CVC'],
+  '切胃':                 ['需 A-line'],
+  'CABG':                 ['需 A-line', '需 CVC', 'Post OP ICU', '術後呼吸器'],
+  'AVR':                  ['需 A-line', '需 CVC', 'Post OP ICU', '術後呼吸器'],
+  'MVR':                  ['需 A-line', '需 CVC', 'Post OP ICU', '術後呼吸器'],
+  'Craniotomy':           ['需 A-line', 'Post OP ICU'],
+  'brain tumor':          ['需 A-line', 'Post OP ICU'],
+  'pituitary tumor':      ['需 A-line'],
+  'LAR':                  ['需 A-line'],
+  'Hemicolectomy':        ['需 A-line'],
+  'free flap':            ['需 A-line', '需 CVC'],
+  'Open Debulking':       ['需 A-line', '需 CVC'],
+  'Laparoscopic Staging': ['需 A-line', '需 CVC']
 };
 
-const REMINDER_LIST = ['高風險', '尚未麻評', '需回問', '困難 airway', '需 A-line', '需 CVC', '需 DLT', '需 VL', '需 FOB', '需粗 line', 'ICU postop', '術後呼吸器'];
+const REMINDER_LIST = ['高風險', '未麻訪', 'Awake 插管', '需 FOB', '需 DLT', '需 A-line', '需粗 line', '需 CVC', '術後呼吸器', 'Post OP ICU'];
 const HX_LIST = ['HTN','DM','CAD','Af','CVA','asthma','COPD','CKD','H/D','BMI','BW>100kg','肝硬化','Bokey','Plavix','NOAC','有停藥'];
-const DATA_LIST = ['Hb < 10','Plt<10萬','eGFR<30','Na<130','K > 5.5','GOT>120','INR>1.5','EKG ok','STD','TWI','RBBB','CXR ok','cardiomegaly','infiltration','echo ok','EF<50','EF<40'];
+const DATA_LIST = ['CXR ok','cardiomegaly','infiltration','EKG ok','STD','TWI','RBBB','echo ok','EF<50','EF<40','Hb < 10','Plt<10萬','eGFR<30','Na<130','K > 5.5','GOT>120','INR>1.5'];
 const ANES_LIST = ['GA','SA','IVG','EA'];
 const GENDER_LIST = ['M','F'];
 const TURN_LIST = ['第1台','第2台','第3台','第4台','急診插入','其他'];
@@ -430,6 +432,12 @@ function initInputPage() {
         <span>鼻管</span>
       </label>
     </div>
+    <div class="prep-card" id="card-hfnc">
+      <label class="prep-toggle">
+        <input type="checkbox" id="chk-hfnc">
+        <span>HFNC</span>
+      </label>
+    </div>
 
     <div class="section-title">Monitoring 備物</div>
     <div class="prep-card" id="card-bis">
@@ -437,6 +445,38 @@ function initInputPage() {
         <input type="checkbox" id="chk-bis">
         <span>BIS</span>
       </label>
+    </div>
+    <div class="prep-card" id="card-cvp">
+      <label class="prep-toggle">
+        <input type="checkbox" id="chk-cvp">
+        <span>CVP kit</span>
+      </label>
+    </div>
+
+    <div class="section-title">備藥</div>
+    <div class="prep-card" id="card-propofol-tci">
+      <label class="prep-toggle"><input type="checkbox" id="chk-propofol-tci"><span>Propofol TCI</span></label>
+    </div>
+    <div class="prep-card" id="card-remi-tci">
+      <label class="prep-toggle"><input type="checkbox" id="chk-remi-tci"><span>Remifentanil TCI</span></label>
+    </div>
+    <div class="prep-card" id="card-nimbex">
+      <label class="prep-toggle"><input type="checkbox" id="chk-nimbex"><span>Nimbex</span></label>
+    </div>
+    <div class="prep-card" id="card-anectine">
+      <label class="prep-toggle"><input type="checkbox" id="chk-anectine"><span>Anectine</span></label>
+    </div>
+    <div class="prep-card" id="card-levophed">
+      <label class="prep-toggle"><input type="checkbox" id="chk-levophed"><span>Levophed 10mcg/ml</span></label>
+    </div>
+    <div class="prep-card" id="card-ketamine">
+      <label class="prep-toggle"><input type="checkbox" id="chk-ketamine"><span>Ketamine</span></label>
+    </div>
+    <div class="prep-card" id="card-droperidol">
+      <label class="prep-toggle"><input type="checkbox" id="chk-droperidol"><span>Droperidol</span></label>
+    </div>
+    <div class="prep-card" id="card-etomidate">
+      <label class="prep-toggle"><input type="checkbox" id="chk-etomidate"><span>Etomidate</span></label>
     </div>
 
     <div class="section-title">止痛備物</div>
@@ -449,6 +489,7 @@ function initInputPage() {
       <div class="prep-body">
         <div class="prep-sub-label">Block type</div>
         <div class="btn-group" id="field-nb-type"></div>
+        <input type="text" id="nb-type-custom" class="text-input" placeholder="✎ 其他 block type 自填" maxlength="30" style="display:none; margin-top:6px; width: 280px;">
 
         <div class="prep-sub-label" style="margin-top:10px;">每隻針筒配方</div>
         <div class="prep-row"><label>Ropivacaine</label><input id="nb-ropi" class="text-input ml-input" type="text" inputmode="decimal"><span>ml</span></div>
@@ -522,25 +563,26 @@ function initInputPage() {
   createBtns('anes', ANES_LIST);
   selectBtn('anes', 'GA');
 
-  createBtns('reminder', REMINDER_LIST, true, true, (val, btn) => {
-    if (val === '困難 airway' && btn.classList.contains('selected')) {
-      document.querySelectorAll('#field-reminder .btn-opt').forEach(b => {
-        if (b.dataset.value === '需 FOB' && !b.classList.contains('selected')) {
-          b.classList.add('selected');
-        }
-      });
-    }
-  });
+  createBtns('reminder', REMINDER_LIST, true, true);
   createBtns('hx', HX_LIST, true);
   createBtns('data', DATA_LIST, true);
 
-  createBtns('nb-type', BLOCK_TYPES);
+  createBtns('nb-type', BLOCK_TYPES, false, false, (v) => {
+    const custom = document.getElementById('nb-type-custom');
+    if (!custom) return;
+    if (v === '其他') {
+      custom.style.display = 'inline-block';
+    } else {
+      custom.style.display = 'none';
+      custom.value = '';
+    }
+  });
   createBtns('nb-diluent', DILUENTS);
   createBtns('t-diluent', DILUENTS);
   selectBtn('nb-diluent', 'Normal saline');
   selectBtn('t-diluent', 'Normal saline');
 
-  ['lma','nke','nasal','bis','nb','testing','spinal','dynastat','acetamol','epca','ivpca'].forEach(k => {
+  ['lma','nke','nasal','hfnc','bis','cvp','propofol-tci','remi-tci','nimbex','anectine','levophed','ketamine','droperidol','etomidate','nb','testing','spinal','dynastat','acetamol','epca','ivpca'].forEach(k => {
     const el = document.getElementById('chk-' + k);
     if (!el) return;
     el.addEventListener('change', () => {
@@ -653,6 +695,10 @@ function readForm() {
   const customOp = customOpEl ? customOpEl.value.trim().slice(0,40) : '';
   const op = customOp || getSingleSelected('op');
 
+  const nbTypeRaw = getSingleSelected('nb-type');
+  const nbTypeCustom = document.getElementById('nb-type-custom').value.trim().slice(0,30);
+  const nbTypeFinal = (nbTypeRaw === '其他') ? (nbTypeCustom || '其他') : nbTypeRaw;
+
   return {
     room,
     turn: finalTurn,
@@ -664,15 +710,27 @@ function readForm() {
     airway: {
       lma: document.getElementById('chk-lma').checked,
       nonKinkingEndo: document.getElementById('chk-nke').checked,
-      nasalTube: document.getElementById('chk-nasal').checked
+      nasalTube: document.getElementById('chk-nasal').checked,
+      hfnc: document.getElementById('chk-hfnc').checked
     },
     monitoring: {
-      bis: document.getElementById('chk-bis').checked
+      bis: document.getElementById('chk-bis').checked,
+      cvpKit: document.getElementById('chk-cvp').checked
+    },
+    medications: {
+      propofolTci: document.getElementById('chk-propofol-tci').checked,
+      remiTci: document.getElementById('chk-remi-tci').checked,
+      nimbex: document.getElementById('chk-nimbex').checked,
+      anectine: document.getElementById('chk-anectine').checked,
+      levophed: document.getElementById('chk-levophed').checked,
+      ketamine: document.getElementById('chk-ketamine').checked,
+      droperidol: document.getElementById('chk-droperidol').checked,
+      etomidate: document.getElementById('chk-etomidate').checked
     },
     analgesia: {
       nerveBlock: {
         enabled: document.getElementById('chk-nb').checked,
-        blockType: getSingleSelected('nb-type'),
+        blockType: nbTypeFinal,
         perSyringe: {
           ropivacaineMl: document.getElementById('nb-ropi').value.trim(),
           decadronMl: document.getElementById('nb-deca').value.trim(),
@@ -723,6 +781,7 @@ function submitPatient() {
         anes: form.anes,
         airway: form.airway,
         monitoring: form.monitoring,
+        medications: form.medications,
         analgesia: form.analgesia,
         reminders: form.reminders,
         hx: form.hx,
@@ -754,6 +813,7 @@ function submitPatient() {
       anes: form.anes,
       airway: form.airway,
       monitoring: form.monitoring,
+      medications: form.medications,
       analgesia: form.analgesia,
       reminders: form.reminders,
       hx: form.hx,
@@ -778,16 +838,18 @@ function resetForm() {
   document.querySelectorAll('#input-page .btn-opt').forEach(b => b.classList.remove('selected'));
   document.getElementById('field-op').innerHTML = '<div class="op-placeholder">💡 請先點選上方「科別」</div>';
   selectBtn('anes', 'GA');
-  ['lma','nke','nasal','bis','nb','testing','spinal','dynastat','acetamol','epca','ivpca'].forEach(k => {
+  ['lma','nke','nasal','hfnc','bis','cvp','propofol-tci','remi-tci','nimbex','anectine','levophed','ketamine','droperidol','etomidate','nb','testing','spinal','dynastat','acetamol','epca','ivpca'].forEach(k => {
     const el = document.getElementById('chk-' + k);
     if (el) el.checked = false;
     const card = document.getElementById('card-' + k);
     if (card) card.classList.remove('on');
   });
-  ['nb-ropi','nb-deca','nb-epi','nb-dilute','nb-count','t-lido','t-dilute','t-count'].forEach(id => {
+  ['nb-ropi','nb-deca','nb-epi','nb-dilute','nb-count','t-lido','t-dilute','t-count','nb-type-custom'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
+  const nbCustom = document.getElementById('nb-type-custom');
+  if (nbCustom) nbCustom.style.display = 'none';
   hidePresetHint();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -852,17 +914,38 @@ function startEdit(id) {
     if (p.airway.lma) { document.getElementById('chk-lma').checked = true; document.getElementById('card-lma').classList.add('on'); }
     if (p.airway.nonKinkingEndo) { document.getElementById('chk-nke').checked = true; document.getElementById('card-nke').classList.add('on'); }
     if (p.airway.nasalTube) { document.getElementById('chk-nasal').checked = true; document.getElementById('card-nasal').classList.add('on'); }
+    if (p.airway.hfnc) { document.getElementById('chk-hfnc').checked = true; document.getElementById('card-hfnc').classList.add('on'); }
   }
-  if (p.monitoring && p.monitoring.bis) {
-    document.getElementById('chk-bis').checked = true;
-    document.getElementById('card-bis').classList.add('on');
+  if (p.monitoring) {
+    if (p.monitoring.bis) { document.getElementById('chk-bis').checked = true; document.getElementById('card-bis').classList.add('on'); }
+    if (p.monitoring.cvpKit) { document.getElementById('chk-cvp').checked = true; document.getElementById('card-cvp').classList.add('on'); }
   }
+  const meds = p.medications || {};
+  const medMap = [['propofol-tci','propofolTci'],['remi-tci','remiTci'],['nimbex','nimbex'],['anectine','anectine'],['levophed','levophed'],['ketamine','ketamine'],['droperidol','droperidol'],['etomidate','etomidate']];
+  medMap.forEach(pair => {
+    if (meds[pair[1]]) {
+      document.getElementById('chk-' + pair[0]).checked = true;
+      document.getElementById('card-' + pair[0]).classList.add('on');
+    }
+  });
 
   const a = p.analgesia || {};
   if (a.nerveBlock && a.nerveBlock.enabled) {
     document.getElementById('chk-nb').checked = true;
     document.getElementById('card-nb').classList.add('on');
-    if (a.nerveBlock.blockType) selectBtn('nb-type', a.nerveBlock.blockType);
+    if (a.nerveBlock.blockType) {
+      if (BLOCK_TYPES.indexOf(a.nerveBlock.blockType) >= 0) {
+        selectBtn('nb-type', a.nerveBlock.blockType);
+        if (a.nerveBlock.blockType === '其他') {
+          document.getElementById('nb-type-custom').style.display = 'inline-block';
+        }
+      } else {
+        selectBtn('nb-type', '其他');
+        const nbc = document.getElementById('nb-type-custom');
+        nbc.style.display = 'inline-block';
+        nbc.value = a.nerveBlock.blockType;
+      }
+    }
     const ps = a.nerveBlock.perSyringe || {};
     document.getElementById('nb-ropi').value = ps.ropivacaineMl || '';
     document.getElementById('nb-deca').value = ps.decadronMl || '';
@@ -1006,7 +1089,7 @@ function renderCase(p) {
     const r = document.createElement('div');
     r.className = 'reminders';
     r.textContent = '⚠️ ' + p.reminders.join('、');
-    if (p.reminders.indexOf('尚未麻評') >= 0) {
+    if (p.reminders.indexOf('未麻訪') >= 0) {
       const clr = document.createElement('button');
       clr.type = 'button';
       clr.className = 'anes-clear';
@@ -1113,10 +1196,26 @@ function buildPrepLines(p) {
     if (p.airway.lma) aw.push('LMA');
     if (p.airway.nonKinkingEndo) aw.push('Non-kinking endo');
     if (p.airway.nasalTube) aw.push('鼻管');
+    if (p.airway.hfnc) aw.push('HFNC');
     if (aw.length) lines.push('Airway：' + aw.join('、'));
   }
-  if (p.monitoring && p.monitoring.bis) {
-    lines.push('Monitoring：BIS');
+  if (p.monitoring) {
+    const mo = [];
+    if (p.monitoring.bis) mo.push('BIS');
+    if (p.monitoring.cvpKit) mo.push('CVP kit');
+    if (mo.length) lines.push('Monitoring：' + mo.join('、'));
+  }
+  if (p.medications) {
+    const md = [];
+    if (p.medications.propofolTci) md.push('Propofol TCI');
+    if (p.medications.remiTci) md.push('Remifentanil TCI');
+    if (p.medications.nimbex) md.push('Nimbex');
+    if (p.medications.anectine) md.push('Anectine');
+    if (p.medications.levophed) md.push('Levophed 10mcg/ml');
+    if (p.medications.ketamine) md.push('Ketamine');
+    if (p.medications.droperidol) md.push('Droperidol');
+    if (p.medications.etomidate) md.push('Etomidate');
+    if (md.length) lines.push('備藥：' + md.join('、'));
   }
 
   if (a.nerveBlock && a.nerveBlock.enabled) {
@@ -1196,7 +1295,7 @@ function clearAnesReview(id) {
   const list = loadPatients();
   const idx = list.findIndex(p => p.id === id);
   if (idx >= 0) {
-    list[idx].reminders = (list[idx].reminders || []).filter(r => r !== '尚未麻評');
+    list[idx].reminders = (list[idx].reminders || []).filter(r => r !== '未麻訪');
     savePatients(list);
     cloudWriteCase(list[idx]);
     renderBoard();
@@ -1290,7 +1389,7 @@ function buildTestingSummary(t) {
 function exportCSV() {
   const list = loadPatients();
   if (!list.length) { alert('沒有資料可匯出'); return; }
-  const headers = ['日期','班別','原房','目前房','第幾台','年齡','性別','科別','術式','麻醉方式','Airway 備物','Monitoring 備物','止痛備物摘要','NB block type','NB 每隻配方','NB 稀釋液','NB 每隻稀釋至 ml','NB 抽幾隻','Testing 摘要','Spinal morphine','Dynastat','Acetamol','Epidural PCA','IVPCA','特殊提醒','Hx','Data','備註','手術狀態'];
+  const headers = ['日期','班別','原房','目前房','第幾台','年齡','性別','科別','術式','麻醉方式','Airway 備物','Monitoring 備物','備藥','止痛備物摘要','NB block type','NB 每隻配方','NB 稀釋液','NB 每隻稀釋至 ml','NB 抽幾隻','Testing 摘要','Spinal morphine','Dynastat','Acetamol','Epidural PCA','IVPCA','特殊提醒','Hx','Data','備註','手術狀態'];
   let csv = '﻿' + headers.map(csvCell).join(',') + '\n';
   list.forEach(p => {
     const a = p.analgesia || {};
@@ -1308,10 +1407,25 @@ function exportCSV() {
       p.op || '',
       p.anes || '',
       (function(){
-        const aw=[]; if(p.airway){ if(p.airway.lma)aw.push('LMA'); if(p.airway.nonKinkingEndo)aw.push('Non-kinking endo'); if(p.airway.nasalTube)aw.push('鼻管'); }
+        const aw=[]; if(p.airway){ if(p.airway.lma)aw.push('LMA'); if(p.airway.nonKinkingEndo)aw.push('Non-kinking endo'); if(p.airway.nasalTube)aw.push('鼻管'); if(p.airway.hfnc)aw.push('HFNC'); }
         return aw.join('；');
       })(),
-      (p.monitoring && p.monitoring.bis) ? 'BIS' : '',
+      (function(){
+        const mo=[]; if(p.monitoring){ if(p.monitoring.bis)mo.push('BIS'); if(p.monitoring.cvpKit)mo.push('CVP kit'); }
+        return mo.join('；');
+      })(),
+      (function(){
+        const md=[]; const m=p.medications||{};
+        if(m.propofolTci)md.push('Propofol TCI');
+        if(m.remiTci)md.push('Remifentanil TCI');
+        if(m.nimbex)md.push('Nimbex');
+        if(m.anectine)md.push('Anectine');
+        if(m.levophed)md.push('Levophed 10mcg/ml');
+        if(m.ketamine)md.push('Ketamine');
+        if(m.droperidol)md.push('Droperidol');
+        if(m.etomidate)md.push('Etomidate');
+        return md.join('；');
+      })(),
       summary,
       nb.enabled ? (nb.blockType || '') : '',
       nb.enabled ? buildNBPerSyringe(nb) : '',

@@ -242,9 +242,27 @@ function buildPrepLines(p) {
     if (p.airway.lma) aw.push('LMA');
     if (p.airway.nonKinkingEndo) aw.push('Non-kinking endo');
     if (p.airway.nasalTube) aw.push('鼻管');
+    if (p.airway.hfnc) aw.push('HFNC');
     if (aw.length) lines.push('Airway：' + aw.join('、'));
   }
-  if (p.monitoring && p.monitoring.bis) lines.push('Monitoring：BIS');
+  if (p.monitoring) {
+    const mo = [];
+    if (p.monitoring.bis) mo.push('BIS');
+    if (p.monitoring.cvpKit) mo.push('CVP kit');
+    if (mo.length) lines.push('Monitoring：' + mo.join('、'));
+  }
+  if (p.medications) {
+    const md = [];
+    if (p.medications.propofolTci) md.push('Propofol TCI');
+    if (p.medications.remiTci) md.push('Remifentanil TCI');
+    if (p.medications.nimbex) md.push('Nimbex');
+    if (p.medications.anectine) md.push('Anectine');
+    if (p.medications.levophed) md.push('Levophed 10mcg/ml');
+    if (p.medications.ketamine) md.push('Ketamine');
+    if (p.medications.droperidol) md.push('Droperidol');
+    if (p.medications.etomidate) md.push('Etomidate');
+    if (md.length) lines.push('備藥：' + md.join('、'));
+  }
 
   if (a.nerveBlock && a.nerveBlock.enabled) {
     const nb = a.nerveBlock;
