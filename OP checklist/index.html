@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="zh-TW" translate="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="google" content="notranslate">
+  <meta http-equiv="Content-Language" content="zh-TW">
+  <title>麻醉 OP Checklist 記錄</title>
+  <style>
+    :root {
+      --bg: #f4f6f9;
+      --card: #ffffff;
+      --ink: #1e3a5f;
+      --ink-soft: #3b6fa0;
+      --ink-2: #5a7593;
+      --line: #d6dee8;
+      --line-soft: #e8edf3;
+      --warn: #c43a31;
+      --warn-bg: #fdecea;
+      --ok: #2e7d4f;
+      --badge-wait: #c98a1a;
+      --badge-current: #c43a31;
+      --badge-done: #2e7d4f;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Microsoft JhengHei", "PingFang TC", "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--ink); padding: 10px; padding-bottom: 84px; font-size: 18px; line-height: 1.5; }
+
+    .header { background: linear-gradient(135deg, #1e3a5f, #3b6fa0); color: white; border-radius: 12px; padding: 14px 18px; margin-bottom: 10px; box-shadow: 0 3px 10px rgba(30,58,95,0.15); }
+    .header h1 { font-size: 22px; font-weight: 700; letter-spacing: 0.5px; }
+    .header .sub { font-size: 16px; opacity: 0.88; margin-top: 2px; }
+
+    .disclaimer { font-size: 14px; color: #5a6a82; background: #eef2f7; padding: 9px 12px; border-left: 4px solid var(--ink-soft); border-radius: 4px; margin-bottom: 12px; line-height: 1.5; }
+
+    .local-status { display: inline-block; font-size: 13px; padding: 5px 10px; border-radius: 6px; margin-bottom: 10px; font-weight: 600; background: #eef2f7; color: var(--ink-2); border: 1px solid var(--line); }
+
+    .group-bar { display: flex; gap: 8px; margin-bottom: 14px; }
+    .group-bar button { flex: 1; min-height: 46px; border: 1.5px solid var(--line); background: white; color: var(--ink); font-size: 16px; font-weight: 600; border-radius: 10px; cursor: pointer; }
+    .group-bar button.active { background: var(--ink); color: white; border-color: var(--ink); }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .section-title { font-size: 16px; font-weight: 700; color: var(--ink); margin: 18px 0 8px 0; padding-left: 10px; border-left: 4px solid var(--ink-soft); }
+    .section-title.first { margin-top: 4px; }
+
+    .btn-group { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; align-items: center; }
+    .btn-opt { min-height: 44px; background: white; border: 1.5px solid var(--line); padding: 8px 14px; border-radius: 8px; font-size: 16px; font-weight: 500; cursor: pointer; color: var(--ink); }
+    .btn-opt.selected { background: var(--ink-soft); color: white; border-color: var(--ink-soft); }
+    .btn-opt.multi.selected { background: var(--ink); border-color: var(--ink); }
+    .btn-opt.risk-opt { border: 1.5px dashed var(--warn); color: var(--warn); font-weight: 600; }
+    .btn-opt.risk-opt.selected { background: var(--warn); color: white; border-color: var(--warn); }
+
+    .text-input { padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 8px; font-size: 16px; background: white; min-height: 44px; color: var(--ink); }
+    .text-input:focus { border-color: var(--ink-soft); outline: none; }
+    .age-input { width: 110px; text-align: center; font-weight: 600; }
+    .surname-input { width: 220px; }
+    .custom-op-input { width: 200px; border: 1.5px dashed var(--ink-soft); font-style: italic; }
+    .custom-op-input:focus { border-style: solid; background: #eef5fb; }
+    .memo-input { width: 100%; font-size: 16px; }
+    .other-input { width: 280px; border: 1.5px dashed var(--ink-soft); font-style: italic; }
+    .other-input:focus { border-style: solid; background: #eef5fb; }
+    .age-container { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; flex-wrap: wrap; }
+
+    .submit-btn { width: 100%; background: var(--ok); color: white; border: none; padding: 14px; border-radius: 10px; font-size: 19px; font-weight: 700; margin-top: 20px; min-height: 54px; cursor: pointer; box-shadow: 0 2px 6px rgba(46,125,79,0.25); }
+    .cancel-btn { width: 100%; background: #8a99a8; color: white; border: none; padding: 12px; border-radius: 10px; font-size: 16px; font-weight: 600; margin-top: 10px; min-height: 48px; cursor: pointer; }
+
+    .op-placeholder { font-size: 14px; color: #889aae; font-style: italic; padding: 8px 0; }
+
+    .board-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+    .board-top h2 { font-size: 20px; font-weight: 700; color: var(--ink); }
+    .board-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .board-actions button { padding: 8px 14px; border: 1.5px solid var(--line); background: white; color: var(--ink); border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; min-height: 40px; }
+    .board-actions button.warn { color: var(--warn); border-color: var(--warn); }
+
+    .room-block { background: var(--card); border-radius: 12px; padding: 14px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(30,58,95,0.08); border: 1px solid var(--line-soft); }
+    .room-title { font-size: 22px; font-weight: 900; color: var(--ink); border-left: 6px solid var(--ink-soft); padding-left: 12px; margin-bottom: 12px; }
+    .room-title .count { font-size: 14px; font-weight: 600; color: var(--ink-2); margin-left: 8px; }
+
+    .case-card { background: white; border: 1.5px solid var(--line); border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+    .case-card:last-child { margin-bottom: 0; }
+    .case-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+    .badge { padding: 5px 12px; border-radius: 999px; font-size: 14px; font-weight: 700; color: white; cursor: pointer; min-height: 30px; line-height: 1.4; border: none; }
+    .badge.wait { background: var(--badge-wait); }
+    .badge.current { background: var(--badge-current); }
+    .badge.done { background: var(--badge-done); }
+    .case-headline { font-size: 20px; font-weight: 700; color: var(--ink); flex: 1; min-width: 200px; word-break: break-word; }
+
+    .room-jump { font-size: 16px; color: var(--warn); background: var(--warn-bg); padding: 8px 12px; border-radius: 6px; margin-bottom: 8px; font-weight: 700; }
+
+    .selfpay-block { background: #f7faff; border-left: 4px solid var(--ink-soft); padding: 10px 12px; border-radius: 6px; margin-bottom: 8px; font-size: 16px; line-height: 1.65; color: var(--ink); word-break: break-word; }
+
+    .reminders { font-size: 16px; font-weight: 700; color: var(--warn); margin-bottom: 8px; line-height: 1.5; }
+    .anes-clear { display: inline-block; margin-left: 8px; font-size: 13px; padding: 4px 10px; background: var(--ok); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; }
+
+    .hxdata { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+    .hxdata-pill { font-size: 14px; padding: 7px 12px; background: #eef2f7; color: var(--ink); border-radius: 6px; cursor: pointer; border: none; font-weight: 600; min-height: 36px; }
+    .hxdata-pill.open { background: var(--ink); color: white; }
+    .hxdata-detail { font-size: 15px; color: var(--ink); background: #f4f6f9; padding: 8px 12px; border-radius: 6px; margin-bottom: 8px; line-height: 1.5; word-break: break-word; }
+
+    .memo-show { font-size: 15px; color: var(--ink-soft); font-style: italic; padding: 6px 0; word-break: break-word; }
+
+    .case-actions { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; padding-top: 10px; border-top: 1px solid var(--line-soft); }
+    .case-actions button { font-size: 14px; padding: 8px 12px; border: 1.5px solid var(--line); background: white; color: var(--ink); border-radius: 6px; cursor: pointer; font-weight: 600; min-height: 40px; }
+    .case-actions button.primary { color: white; background: var(--ink-soft); border-color: var(--ink-soft); }
+    .case-actions button.warn { color: var(--warn); border-color: var(--warn); }
+    .case-actions button.ok { color: white; background: var(--ok); border-color: var(--ok); }
+
+    .empty-tip { text-align: center; color: #889aae; margin-top: 40px; font-size: 18px; padding: 40px 20px; background: white; border-radius: 12px; border: 1px dashed var(--line); }
+
+    .nav { position: fixed; bottom: 0; left: 0; right: 0; height: 64px; background: white; border-top: 1px solid var(--line); display: flex; justify-content: space-around; align-items: center; z-index: 100; box-shadow: 0 -2px 8px rgba(0,0,0,0.05); }
+    .nav-btn { background: none; border: none; font-size: 17px; font-weight: 700; color: #889aae; width: 50%; height: 100%; cursor: pointer; }
+    .nav-btn.active { color: var(--ink); background: #eef5fb; }
+
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(30,58,95,0.55); z-index: 200; align-items: center; justify-content: center; padding: 20px; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: white; border-radius: 12px; padding: 18px; width: 100%; max-width: 380px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+    .modal h3 { font-size: 18px; color: var(--ink); margin-bottom: 12px; }
+    .modal .room-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .modal .room-grid button { min-width: 70px; min-height: 44px; padding: 8px 14px; border: 1.5px solid var(--line); background: white; border-radius: 8px; font-weight: 600; font-size: 16px; cursor: pointer; color: var(--ink); }
+    .modal .room-grid button.current { border-color: var(--ink); background: var(--ink); color: white; }
+    .modal .close { width: 100%; padding: 10px; background: #8a99a8; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; min-height: 44px; font-size: 16px; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>彰化秀傳麻醉科</h1>
+    <div class="sub">麻醉 OP Checklist 記錄</div>
+  </div>
+  <div class="disclaimer">
+    本工具僅供麻醉醫師個人記錄使用，資料只存於本機（本手機瀏覽器），不上傳雲端、不與其他裝置同步。請避免輸入完整姓名、病歷號等個資；姓氏僅供自行辨認。
+  </div>
+  <div id="local-status" class="local-status">📱 本機模式（資料只存這支手機）</div>
+  <div class="group-bar" id="group-bar"></div>
+
+  <div id="input-page" class="page active"></div>
+
+  <div id="board-page" class="page">
+    <div class="board-top">
+      <h2>今日 Checklist</h2>
+      <div class="board-actions">
+        <button onclick="exportCSV()">📥 匯出 CSV</button>
+        <button class="warn" onclick="resetAll()">重置全天</button>
+      </div>
+    </div>
+    <div id="board-container"></div>
+  </div>
+
+  <div class="nav">
+    <button class="nav-btn active" id="nav-input" onclick="switchPage('input-page', this)">📱 新增 case</button>
+    <button class="nav-btn" id="nav-board" onclick="switchPage('board-page', this); renderBoard();">📊 看板</button>
+  </div>
+
+  <div class="modal-overlay" id="room-change-modal">
+    <div class="modal">
+      <h3>跳房：選擇新房間</h3>
+      <div class="room-grid" id="room-change-grid"></div>
+      <button class="close" onclick="closeRoomChange()">取消</button>
+    </div>
+  </div>
+
+<script>
+const STORAGE_KEYS = {
+  patients: 'opChecklist_patients',
+  selectedRoomGroup: 'opChecklist_selectedRoomGroup',
+  dataDate: 'opChecklist_dataDate'
+};
+
+const ROOM_GROUPS = {
+  day_front: { label: '白班前段', rooms: ['1','2','5','6','13'] },
+  day_back:  { label: '白班後段', rooms: ['7','8','9','11','13','18'] },
+  duty:      { label: '值班',     rooms: ['1','2','5','6','7','8','9','11','13','18'] }
+};
+
+const OP_MAPPING = {
+  'Ortho': ['TKR', 'THR', '膝關節鏡', 'RCT', 'radius', 'humerus', 'clavicle', 'femur', 'tibia', 'patella', 'ankle', 'pelvic', 'PELD', 'L-spine', 'C-spine', '骨水泥'],
+  'ENT':   ['FESS', 'LMS', 'Tympanoplasty', 'Thyroid', 'tumor excision', 'LN biopsy', 'tonsillectomy'],
+  'NS':    ['Craniotomy', 'L spine', 'C spine', 'VP-shunt', 'RF', '骨水泥', 'brain tumor', 'pituitary tumor', 'ICP monitor'],
+  'CS':    ['Wedge', 'Rib fracture', 'Lobectomy', 'segemenctectomy', '食道擴張', 'Esophagectomy', 'tracheostomy', 'PP window'],
+  'CVS':   ['CABG', 'AVR', 'MVR', 'AV shunt', 'Varicose', 'TEVAR', 'AAA stent', 'type A', 'perm-cath'],
+  'GYN':   ['子宮鏡', 'ATH', 'LAVH', 'Myomectomy', 'D&C', 'C/S', 'Open Debulking', 'Laparoscopic Staging', '卵巢手術'],
+  'GU':    ['TURBT', 'RIRS', 'RRP', '膀胱鏡', 'URSL', 'TURP', 'vasetomy', 'hernia'],
+  'PS':    ['Debridement', 'STSG', 'Flap', '整形'],
+  'OS':    ['free flap', 'wide excision', 'zygoma fracture', '拔牙'],
+  'GS':    ['LC', 'Appen', 'Hernia', '切胃', '切肝', 'port A', 'thyroid', 'parathyroid', 'GI RF'],
+  'CRS':   ['Hemicolectomy', 'AR', 'LAR', 'Anal fistula', 'hemorrhoid', '腸造口'],
+  'BS':    ['Partial mastectomy', 'MRM'],
+  'OPH':   ['眼科手術']
+};
+
+const REMINDER_LIST = ['高風險', '未麻訪', 'Awake 插管', 'Post OP ICU'];
+const SELFPAY_LIST = ['Suga', 'BIS', 'NB', 'Dynastat', 'Acetamol', 'Epidural PCA', 'Byfavo', 'HFNC'];
+const HX_LIST = ['HTN','DM','CAD','Af','CVA','asthma','COPD','CKD','H/D','BMI','BW>100kg','肝硬化','Bokey','Plavix','NOAC','有停藥','其他'];
+const DATA_LIST = ['CXR ok','cardiomegaly','infiltration','EKG ok','STD','TWI','RBBB','echo ok','EF<50','EF<40','Hb < 10','Plt<10萬','eGFR<30','Na<130','K > 5.5','GOT>120','INR>1.5','其他'];
+const ANES_LIST = ['GA','SA','IVG','EA'];
+const GENDER_LIST = ['M','F'];
+const TURN_LIST = ['第1台','第2台','第3台','第4台','急診插入','其他'];
+const STATUS_ORDER = ['待手術','手術中','已完成'];
+
+let currentRoomGroup = loadRoomGroup();
+let editingId = null;
+const expandedHx = new Set();
+const expandedData = new Set();
+let pendingRoomChangeId = null;
+
+function todayStr() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function loadPatients() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.patients)) || []; }
+  catch(e) { return []; }
+}
+function savePatients(list) {
+  localStorage.setItem(STORAGE_KEYS.patients, JSON.stringify(list));
+  localStorage.setItem(STORAGE_KEYS.dataDate, todayStr());
+}
+function checkAndPurgeStaleData() {
+  const storedDate = localStorage.getItem(STORAGE_KEYS.dataDate);
+  if (storedDate && storedDate !== todayStr()) {
+    localStorage.removeItem(STORAGE_KEYS.patients);
+  }
+  localStorage.setItem(STORAGE_KEYS.dataDate, todayStr());
+}
+function scheduleNightlyPurge() {
+  const now = new Date();
+  const next = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 0, 0);
+  if (next <= now) next.setDate(next.getDate() + 1);
+  const ms = next.getTime() - now.getTime();
+  setTimeout(() => {
+    localStorage.removeItem(STORAGE_KEYS.patients);
+    localStorage.setItem(STORAGE_KEYS.dataDate, todayStr());
+    expandedHx.clear(); expandedData.clear();
+    if (document.getElementById('board-page').classList.contains('active')) renderBoard();
+    try { alert('已自動清除今日資料（23:59 排程）'); } catch(e) {}
+    scheduleNightlyPurge();
+  }, ms);
+}
+
+function loadRoomGroup() {
+  return localStorage.getItem(STORAGE_KEYS.selectedRoomGroup) || 'day_front';
+}
+function saveRoomGroup(g) {
+  localStorage.setItem(STORAGE_KEYS.selectedRoomGroup, g);
+}
+
+function renderGroupBar() {
+  const bar = document.getElementById('group-bar');
+  bar.innerHTML = '';
+  Object.entries(ROOM_GROUPS).forEach(([key, cfg]) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = cfg.label;
+    if (key === currentRoomGroup) btn.classList.add('active');
+    btn.onclick = () => {
+      currentRoomGroup = key;
+      saveRoomGroup(key);
+      renderGroupBar();
+      renderRoomButtons();
+      if (document.getElementById('board-page').classList.contains('active')) renderBoard();
+    };
+    bar.appendChild(btn);
+  });
+}
+
+function renderRoomButtons() {
+  const container = document.getElementById('field-room');
+  if (!container) return;
+  const rooms = ROOM_GROUPS[currentRoomGroup].rooms;
+  const prevBtn = container.querySelector('.btn-opt.selected');
+  const prevSelected = prevBtn ? prevBtn.dataset.value : '';
+  container.innerHTML = '';
+  rooms.forEach(r => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn-opt single';
+    btn.dataset.value = r;
+    btn.textContent = 'R' + r;
+    if (r === prevSelected) btn.classList.add('selected');
+    btn.onclick = () => {
+      container.querySelectorAll('.btn-opt').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    };
+    container.appendChild(btn);
+  });
+}
+
+function initInputPage() {
+  const page = document.getElementById('input-page');
+  page.innerHTML = `
+    <div class="section-title first">Room（依班別過濾）</div>
+    <div class="btn-group" id="field-room"></div>
+
+    <div class="section-title">第幾台</div>
+    <div class="btn-group" id="field-turn"></div>
+    <input type="text" id="turn-custom" class="text-input" placeholder="✎ 其他（自填）" maxlength="20" style="display:none; width:220px; margin-top:6px;">
+
+    <div class="section-title">姓氏（辨認用）</div>
+    <input type="text" id="surname-input" class="text-input surname-input" placeholder="姓氏（勿填全名）" maxlength="10">
+
+    <div class="section-title">年齡 / 性別</div>
+    <div class="age-container">
+      <input type="number" inputmode="numeric" id="age-input" class="text-input age-input" placeholder="年齡" min="0" max="120">
+      <span style="font-weight:600;color:var(--ink-2)">歲</span>
+      <div class="btn-group" id="field-gender" style="margin:0;"></div>
+    </div>
+
+    <div class="section-title">科別</div>
+    <div class="btn-group" id="field-dept"></div>
+
+    <div class="section-title">術式</div>
+    <div class="btn-group" id="field-op">
+      <div class="op-placeholder" id="op-tip">💡 請先點選上方「科別」</div>
+    </div>
+
+    <div class="section-title">麻醉方式</div>
+    <div class="btn-group" id="field-anes"></div>
+
+    <div class="section-title">自費</div>
+    <div class="btn-group" id="field-selfpay"></div>
+
+    <div class="section-title">特殊提醒</div>
+    <div class="btn-group" id="field-reminder"></div>
+
+    <div class="section-title">Hx（病史）</div>
+    <div class="btn-group" id="field-hx"></div>
+    <input type="text" id="hx-other" class="text-input other-input" placeholder="✎ 其他病史（自填）" maxlength="60" style="display:none; margin-top:6px;">
+
+    <div class="section-title">Data（異常指標）</div>
+    <div class="btn-group" id="field-data"></div>
+    <input type="text" id="data-other" class="text-input other-input" placeholder="✎ 其他數據（自填）" maxlength="60" style="display:none; margin-top:6px;">
+
+    <div class="section-title">備註（最多 80 字）</div>
+    <input type="text" id="memo-input" class="text-input memo-input" placeholder="請勿輸入全名、病歷號或完整病歷內容" maxlength="80">
+
+    <button class="submit-btn" id="submit-btn" onclick="submitPatient()">送出到看板</button>
+    <button class="cancel-btn" id="cancel-edit-btn" onclick="cancelEdit()" style="display:none;">取消編輯</button>
+  `;
+
+  renderRoomButtons();
+  createBtns('turn', TURN_LIST, false, false, (v) => {
+    const custom = document.getElementById('turn-custom');
+    custom.style.display = (v === '其他') ? 'inline-block' : 'none';
+    if (v !== '其他') custom.value = '';
+  });
+  createBtns('gender', GENDER_LIST);
+  createBtns('dept', Object.keys(OP_MAPPING));
+  createBtns('anes', ANES_LIST);
+  selectBtn('anes', 'GA');
+
+  createBtns('selfpay', SELFPAY_LIST, true);
+  createBtns('reminder', REMINDER_LIST, true, true);
+  createBtns('hx', HX_LIST, true, false, (v, btn) => toggleOther('hx', v, btn));
+  createBtns('data', DATA_LIST, true, false, (v, btn) => toggleOther('data', v, btn));
+}
+
+function toggleOther(group, v, btn) {
+  if (v !== '其他') return;
+  const input = document.getElementById(group + '-other');
+  if (!input) return;
+  const on = btn.classList.contains('selected');
+  input.style.display = on ? 'inline-block' : 'none';
+  if (!on) input.value = '';
+}
+
+function createBtns(id, list, isMulti, isRisk, onAfter) {
+  const container = document.getElementById('field-' + id);
+  if (!container) return;
+  container.innerHTML = '';
+  list.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn-opt ' + (isMulti ? 'multi' : 'single') + (isRisk ? ' risk-opt' : '');
+    btn.textContent = opt;
+    btn.dataset.value = opt;
+    btn.onclick = () => {
+      if (!isMulti) container.querySelectorAll('.btn-opt').forEach(b => b.classList.remove('selected'));
+      btn.classList.toggle('selected');
+      if (id === 'dept') updateOpButtons(opt);
+      if (onAfter) onAfter(opt, btn);
+    };
+    container.appendChild(btn);
+  });
+}
+
+function updateOpButtons(dept) {
+  const container = document.getElementById('field-op');
+  container.innerHTML = '';
+  (OP_MAPPING[dept] || []).forEach(name => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn-opt single';
+    btn.dataset.value = name;
+    btn.textContent = name;
+    btn.onclick = () => {
+      container.querySelectorAll('.btn-opt').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      const customEl = document.getElementById('custom-op');
+      if (customEl) customEl.value = '';
+    };
+    container.appendChild(btn);
+  });
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.id = 'custom-op';
+  input.className = 'text-input custom-op-input';
+  input.placeholder = '✎ 自填術式';
+  input.maxLength = 40;
+  input.oninput = () => {
+    container.querySelectorAll('.btn-opt').forEach(b => b.classList.remove('selected'));
+  };
+  container.appendChild(input);
+}
+
+function getSingleSelected(id) {
+  const btn = document.querySelector('#field-' + id + ' .btn-opt.selected');
+  return btn ? btn.dataset.value : '';
+}
+function getMultiSelected(id) {
+  return Array.from(document.querySelectorAll('#field-' + id + ' .btn-opt.selected')).map(b => b.dataset.value);
+}
+function selectBtn(id, val) {
+  if (!val) return;
+  const btns = document.querySelectorAll('#field-' + id + ' .btn-opt');
+  let found = false;
+  btns.forEach(b => { if (b.dataset.value === val) found = true; });
+  if (!found) return;
+  btns.forEach(b => b.classList.remove('selected'));
+  btns.forEach(b => { if (b.dataset.value === val) b.classList.add('selected'); });
+}
+function selectBtnMulti(id, val) {
+  if (!val) return;
+  document.querySelectorAll('#field-' + id + ' .btn-opt').forEach(b => {
+    if (b.dataset.value === val) b.classList.add('selected');
+  });
+}
+
+function readForm() {
+  const room = getSingleSelected('room');
+  const turn = getSingleSelected('turn');
+  const turnCustom = document.getElementById('turn-custom').value.trim().slice(0,20);
+  const finalTurn = (turn === '其他') ? (turnCustom || '其他') : turn;
+
+  const customOpEl = document.getElementById('custom-op');
+  const customOp = customOpEl ? customOpEl.value.trim().slice(0,40) : '';
+  const op = customOp || getSingleSelected('op');
+
+  const hx = getMultiSelected('hx');
+  const data = getMultiSelected('data');
+
+  return {
+    room,
+    turn: finalTurn,
+    surname: document.getElementById('surname-input').value.trim().slice(0,10),
+    age: document.getElementById('age-input').value.trim().slice(0,3),
+    gender: getSingleSelected('gender'),
+    dept: getSingleSelected('dept'),
+    op,
+    anes: getSingleSelected('anes'),
+    selfpay: getMultiSelected('selfpay'),
+    reminders: getMultiSelected('reminder'),
+    hx,
+    hxOther: hx.indexOf('其他') >= 0 ? document.getElementById('hx-other').value.trim().slice(0,60) : '',
+    data,
+    dataOther: data.indexOf('其他') >= 0 ? document.getElementById('data-other').value.trim().slice(0,60) : '',
+    memo: document.getElementById('memo-input').value.trim().slice(0,80)
+  };
+}
+
+function submitPatient() {
+  const form = readForm();
+  if (!form.room) { alert('請至少選擇 Room！'); return; }
+
+  const list = loadPatients();
+  if (editingId != null) {
+    const idx = list.findIndex(p => p.id === editingId);
+    if (idx >= 0) {
+      const existing = list[idx];
+      list[idx] = Object.assign({}, existing, {
+        currentRoom: form.room,
+        turn: form.turn,
+        surname: form.surname,
+        age: form.age,
+        gender: form.gender,
+        dept: form.dept,
+        op: form.op,
+        anes: form.anes,
+        selfpay: form.selfpay,
+        reminders: form.reminders,
+        hx: form.hx,
+        hxOther: form.hxOther,
+        data: form.data,
+        dataOther: form.dataOther,
+        memo: form.memo
+      });
+    }
+    editingId = null;
+    document.getElementById('submit-btn').textContent = '送出到看板';
+    document.getElementById('cancel-edit-btn').style.display = 'none';
+    savePatients(list);
+    resetForm();
+    switchToBoardTab();
+  } else {
+    const newCase = {
+      id: Date.now(),
+      date: todayStr(),
+      roomGroup: currentRoomGroup,
+      originalRoom: form.room,
+      currentRoom: form.room,
+      turn: form.turn,
+      surname: form.surname,
+      age: form.age,
+      gender: form.gender,
+      dept: form.dept,
+      op: form.op,
+      anes: form.anes,
+      selfpay: form.selfpay,
+      reminders: form.reminders,
+      hx: form.hx,
+      hxOther: form.hxOther,
+      data: form.data,
+      dataOther: form.dataOther,
+      memo: form.memo,
+      status: '待手術',
+      createdAt: Date.now()
+    };
+    list.push(newCase);
+    savePatients(list);
+    resetForm();
+    alert('R' + newCase.currentRoom + (newCase.turn ? '｜' + newCase.turn : '') + ' 新增成功！');
+  }
+}
+
+function resetForm() {
+  document.getElementById('surname-input').value = '';
+  document.getElementById('age-input').value = '';
+  document.getElementById('memo-input').value = '';
+  document.getElementById('turn-custom').value = '';
+  document.getElementById('turn-custom').style.display = 'none';
+  ['hx-other','data-other'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.value = ''; el.style.display = 'none'; }
+  });
+  document.querySelectorAll('#input-page .btn-opt').forEach(b => b.classList.remove('selected'));
+  document.getElementById('field-op').innerHTML = '<div class="op-placeholder">💡 請先點選上方「科別」</div>';
+  selectBtn('anes', 'GA');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function cancelEdit() {
+  editingId = null;
+  document.getElementById('submit-btn').textContent = '送出到看板';
+  document.getElementById('cancel-edit-btn').style.display = 'none';
+  resetForm();
+}
+
+function isStandardTurn(t) {
+  return ['第1台','第2台','第3台','第4台','急診插入'].indexOf(t) >= 0;
+}
+
+function startEdit(id) {
+  const list = loadPatients();
+  const p = list.find(x => x.id === id);
+  if (!p) return;
+  editingId = id;
+  resetForm();
+
+  if (ROOM_GROUPS[currentRoomGroup].rooms.indexOf(p.currentRoom) < 0) {
+    if (p.roomGroup && ROOM_GROUPS[p.roomGroup] && ROOM_GROUPS[p.roomGroup].rooms.indexOf(p.currentRoom) >= 0) {
+      currentRoomGroup = p.roomGroup;
+    } else {
+      currentRoomGroup = 'duty';
+    }
+    saveRoomGroup(currentRoomGroup);
+    renderGroupBar();
+  }
+  renderRoomButtons();
+  selectBtn('room', p.currentRoom);
+
+  if (isStandardTurn(p.turn)) {
+    selectBtn('turn', p.turn);
+  } else if (p.turn) {
+    selectBtn('turn', '其他');
+    const custom = document.getElementById('turn-custom');
+    custom.style.display = 'inline-block';
+    custom.value = p.turn;
+  }
+
+  document.getElementById('surname-input').value = p.surname || '';
+  document.getElementById('age-input').value = p.age || '';
+  selectBtn('gender', p.gender);
+
+  if (p.dept) {
+    selectBtn('dept', p.dept);
+    updateOpButtons(p.dept);
+    if (p.op) {
+      const matched = (OP_MAPPING[p.dept] || []).indexOf(p.op) >= 0;
+      if (matched) selectBtn('op', p.op);
+      else {
+        const customOp = document.getElementById('custom-op');
+        if (customOp) customOp.value = p.op;
+      }
+    }
+  }
+  selectBtn('anes', p.anes);
+
+  (p.selfpay || []).forEach(s => selectBtnMulti('selfpay', s));
+  (p.reminders || []).forEach(r => selectBtnMulti('reminder', r));
+  (p.hx || []).forEach(r => selectBtnMulti('hx', r));
+  (p.data || []).forEach(r => selectBtnMulti('data', r));
+
+  if (p.hxOther) {
+    selectBtnMulti('hx', '其他');
+    const hxo = document.getElementById('hx-other');
+    hxo.style.display = 'inline-block';
+    hxo.value = p.hxOther;
+  }
+  if (p.dataOther) {
+    selectBtnMulti('data', '其他');
+    const dto = document.getElementById('data-other');
+    dto.style.display = 'inline-block';
+    dto.value = p.dataOther;
+  }
+
+  document.getElementById('memo-input').value = p.memo || '';
+
+  document.getElementById('submit-btn').textContent = '更新此 case';
+  document.getElementById('cancel-edit-btn').style.display = 'block';
+
+  document.querySelectorAll('.page').forEach(pg => pg.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('input-page').classList.add('active');
+  document.getElementById('nav-input').classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderBoard() {
+  const container = document.getElementById('board-container');
+  container.innerHTML = '';
+  const all = loadPatients();
+  if (!all.length) {
+    const tip = document.createElement('div');
+    tip.className = 'empty-tip';
+    tip.textContent = '📭 目前尚無 case 資料';
+    container.appendChild(tip);
+    return;
+  }
+  const allowedRooms = ROOM_GROUPS[currentRoomGroup].rooms;
+  const activeRooms = allowedRooms.filter(r => all.some(p => p.currentRoom === r));
+  if (!activeRooms.length) {
+    const tip = document.createElement('div');
+    tip.className = 'empty-tip';
+    tip.textContent = '📭 ' + ROOM_GROUPS[currentRoomGroup].label + ' 目前無 case';
+    container.appendChild(tip);
+    return;
+  }
+  const TURN_SORT = ['第1台','第2台','第3台','第4台','急診插入'];
+  function turnSortKey(t) {
+    const i = TURN_SORT.indexOf(t);
+    return i === -1 ? 99 : i;
+  }
+  // 狀態優先：手術中 → 待手術 → 已完成
+  const STATUS_SORT = { '手術中': 0, '待手術': 1, '已完成': 2 };
+  function statusSortKey(s) {
+    return (s in STATUS_SORT) ? STATUS_SORT[s] : 1;
+  }
+  activeRooms.forEach(roomNum => {
+    const cases = all.filter(p => p.currentRoom === roomNum);
+    cases.sort((a,b) => {
+      const sa = statusSortKey(a.status), sb = statusSortKey(b.status);
+      if (sa !== sb) return sa - sb;
+      const ka = turnSortKey(a.turn), kb = turnSortKey(b.turn);
+      if (ka !== kb) return ka - kb;
+      return (a.createdAt || a.id) - (b.createdAt || b.id);
+    });
+    const block = document.createElement('div');
+    block.className = 'room-block';
+    const title = document.createElement('div');
+    title.className = 'room-title';
+    const tNum = document.createElement('span');
+    tNum.textContent = 'Room ' + roomNum;
+    title.appendChild(tNum);
+    const tCount = document.createElement('span');
+    tCount.className = 'count';
+    tCount.textContent = '（' + cases.length + ' case）';
+    title.appendChild(tCount);
+    block.appendChild(title);
+    cases.forEach(c => block.appendChild(renderCase(c)));
+    container.appendChild(block);
+  });
+}
+
+function renderCase(p) {
+  const card = document.createElement('div');
+  card.className = 'case-card';
+
+  const head = document.createElement('div');
+  head.className = 'case-head';
+  const statusKey = p.status === '手術中' ? 'current' : (p.status === '已完成' ? 'done' : 'wait');
+  const badge = document.createElement('button');
+  badge.type = 'button';
+  badge.className = 'badge ' + statusKey;
+  badge.textContent = p.status || '待手術';
+  badge.title = '點擊切換狀態';
+  badge.onclick = () => cycleStatus(p.id);
+  head.appendChild(badge);
+
+  const headline = document.createElement('div');
+  headline.className = 'case-headline';
+  const headParts = [];
+  if (p.surname) headParts.push(p.surname);
+  if (p.turn) headParts.push(p.turn);
+  if (p.dept) headParts.push(p.dept);
+  if (p.op) headParts.push(p.op);
+  if (p.anes) headParts.push(p.anes);
+  const ag = (p.age ? p.age + 'y' : '') + (p.gender || '');
+  if (ag) headParts.push(ag);
+  headline.textContent = headParts.join('｜') || '（未填）';
+  head.appendChild(headline);
+  card.appendChild(head);
+
+  if (p.originalRoom && p.originalRoom !== p.currentRoom) {
+    const jump = document.createElement('div');
+    jump.className = 'room-jump';
+    jump.textContent = '⚠️ 跳房：R' + p.originalRoom + ' → R' + p.currentRoom;
+    card.appendChild(jump);
+  }
+
+  if (p.selfpay && p.selfpay.length) {
+    const sp = document.createElement('div');
+    sp.className = 'selfpay-block';
+    sp.textContent = '💲 自費：' + p.selfpay.join('、');
+    card.appendChild(sp);
+  }
+
+  if (p.reminders && p.reminders.length) {
+    const r = document.createElement('div');
+    r.className = 'reminders';
+    r.textContent = '⚠️ ' + p.reminders.join('、');
+    if (p.reminders.indexOf('未麻訪') >= 0) {
+      const clr = document.createElement('button');
+      clr.type = 'button';
+      clr.className = 'anes-clear';
+      clr.textContent = '✓ 已評估';
+      clr.onclick = () => clearAnesReview(p.id);
+      r.appendChild(clr);
+    }
+    card.appendChild(r);
+  }
+
+  const hxList = buildHxList(p);
+  const dataList = buildDataList(p);
+  if (hxList.length || dataList.length) {
+    const row = document.createElement('div');
+    row.className = 'hxdata';
+    if (hxList.length) {
+      const pill = document.createElement('button');
+      pill.type = 'button';
+      pill.className = 'hxdata-pill' + (expandedHx.has(p.id) ? ' open' : '');
+      pill.textContent = (expandedHx.has(p.id) ? '▾' : '▸') + ' Hx (' + hxList.length + ')';
+      pill.onclick = () => {
+        if (expandedHx.has(p.id)) expandedHx.delete(p.id); else expandedHx.add(p.id);
+        renderBoard();
+      };
+      row.appendChild(pill);
+    }
+    if (dataList.length) {
+      const pill = document.createElement('button');
+      pill.type = 'button';
+      pill.className = 'hxdata-pill' + (expandedData.has(p.id) ? ' open' : '');
+      pill.textContent = (expandedData.has(p.id) ? '▾' : '▸') + ' Data (' + dataList.length + ')';
+      pill.onclick = () => {
+        if (expandedData.has(p.id)) expandedData.delete(p.id); else expandedData.add(p.id);
+        renderBoard();
+      };
+      row.appendChild(pill);
+    }
+    card.appendChild(row);
+
+    if (expandedHx.has(p.id) && hxList.length) {
+      const d = document.createElement('div');
+      d.className = 'hxdata-detail';
+      d.textContent = 'Hx：' + hxList.join('、');
+      card.appendChild(d);
+    }
+    if (expandedData.has(p.id) && dataList.length) {
+      const d = document.createElement('div');
+      d.className = 'hxdata-detail';
+      d.textContent = 'Data：' + dataList.join('、');
+      card.appendChild(d);
+    }
+  }
+
+  if (p.memo) {
+    const m = document.createElement('div');
+    m.className = 'memo-show';
+    m.textContent = '✍ ' + p.memo;
+    card.appendChild(m);
+  }
+
+  const actions = document.createElement('div');
+  actions.className = 'case-actions';
+  if (p.status === '待手術') {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'primary';
+    b.textContent = '▶ 進入';
+    b.onclick = () => setStatus(p.id, '手術中');
+    actions.appendChild(b);
+  }
+  if (p.status === '手術中') {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'ok';
+    b.textContent = '✓ 完成';
+    b.onclick = () => setStatus(p.id, '已完成');
+    actions.appendChild(b);
+  }
+  const jump = document.createElement('button');
+  jump.type = 'button';
+  jump.textContent = '🔀 跳房';
+  jump.onclick = () => openRoomChange(p.id);
+  actions.appendChild(jump);
+  const ed = document.createElement('button');
+  ed.type = 'button';
+  ed.textContent = '✎ 編輯';
+  ed.onclick = () => startEdit(p.id);
+  actions.appendChild(ed);
+  const del = document.createElement('button');
+  del.type = 'button';
+  del.className = 'warn';
+  del.textContent = '刪除';
+  del.onclick = () => { if (confirm('確定刪除此 case？')) deleteCase(p.id); };
+  actions.appendChild(del);
+  card.appendChild(actions);
+
+  return card;
+}
+
+function buildHxList(p) {
+  const list = (p.hx || []).filter(x => x !== '其他');
+  if (p.hxOther) list.push(p.hxOther);
+  return list;
+}
+function buildDataList(p) {
+  const list = (p.data || []).filter(x => x !== '其他');
+  if (p.dataOther) list.push(p.dataOther);
+  return list;
+}
+
+function cycleStatus(id) {
+  const list = loadPatients();
+  const idx = list.findIndex(p => p.id === id);
+  if (idx < 0) return;
+  const cur = list[idx].status || '待手術';
+  const ni = (STATUS_ORDER.indexOf(cur) + 1) % STATUS_ORDER.length;
+  list[idx].status = STATUS_ORDER[ni];
+  savePatients(list);
+  renderBoard();
+}
+function setStatus(id, s) {
+  const list = loadPatients();
+  const idx = list.findIndex(p => p.id === id);
+  if (idx >= 0) {
+    list[idx].status = s;
+    savePatients(list);
+    renderBoard();
+  }
+}
+function deleteCase(id) {
+  const list = loadPatients().filter(p => p.id !== id);
+  savePatients(list);
+  expandedHx.delete(id); expandedData.delete(id);
+  renderBoard();
+}
+function clearAnesReview(id) {
+  const list = loadPatients();
+  const idx = list.findIndex(p => p.id === id);
+  if (idx >= 0) {
+    list[idx].reminders = (list[idx].reminders || []).filter(r => r !== '未麻訪');
+    savePatients(list);
+    renderBoard();
+  }
+}
+
+function openRoomChange(id) {
+  pendingRoomChangeId = id;
+  const list = loadPatients();
+  const p = list.find(x => x.id === id);
+  const grid = document.getElementById('room-change-grid');
+  grid.innerHTML = '';
+  const allowed = new Set(ROOM_GROUPS[currentRoomGroup].rooms);
+  if (p && p.originalRoom) allowed.add(p.originalRoom);
+  if (p && p.currentRoom) allowed.add(p.currentRoom);
+  const rooms = Array.from(allowed).sort((a,b) => Number(a) - Number(b));
+  rooms.forEach(r => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = 'R' + r;
+    if (p && r === p.currentRoom) btn.classList.add('current');
+    btn.onclick = () => doRoomChange(r);
+    grid.appendChild(btn);
+  });
+  document.getElementById('room-change-modal').classList.add('show');
+}
+function closeRoomChange() {
+  pendingRoomChangeId = null;
+  document.getElementById('room-change-modal').classList.remove('show');
+}
+function doRoomChange(newRoom) {
+  if (pendingRoomChangeId == null) return;
+  const list = loadPatients();
+  const idx = list.findIndex(p => p.id === pendingRoomChangeId);
+  if (idx >= 0) {
+    list[idx].currentRoom = newRoom;
+    savePatients(list);
+  }
+  closeRoomChange();
+  renderBoard();
+}
+
+function switchPage(pageId, navBtn) {
+  document.querySelectorAll('.page').forEach(pg => pg.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(pageId).classList.add('active');
+  navBtn.classList.add('active');
+}
+function switchToBoardTab() {
+  document.querySelectorAll('.page').forEach(pg => pg.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('board-page').classList.add('active');
+  document.getElementById('nav-board').classList.add('active');
+  renderBoard();
+}
+
+function resetAll() {
+  if (!confirm('確定清除今日全部資料？（僅清除這支手機的本機資料）')) return;
+  localStorage.removeItem(STORAGE_KEYS.patients);
+  localStorage.setItem(STORAGE_KEYS.dataDate, todayStr());
+  expandedHx.clear(); expandedData.clear();
+  renderBoard();
+}
+
+function csvCell(v) {
+  if (v == null) v = '';
+  v = String(v);
+  if (/[",\n\r]/.test(v)) v = '"' + v.replace(/"/g, '""') + '"';
+  return v;
+}
+
+function exportCSV() {
+  const list = loadPatients();
+  if (!list.length) { alert('沒有資料可匯出'); return; }
+  const headers = ['日期','班別','原房','目前房','第幾台','姓氏','年齡','性別','科別','術式','麻醉方式','自費','特殊提醒','Hx','Data','備註','手術狀態'];
+  let csv = '﻿' + headers.map(csvCell).join(',') + '\n';
+  list.forEach(p => {
+    const row = [
+      p.date || todayStr(),
+      (ROOM_GROUPS[p.roomGroup] && ROOM_GROUPS[p.roomGroup].label) || p.roomGroup || '',
+      p.originalRoom || '',
+      p.currentRoom || '',
+      p.turn || '',
+      p.surname || '',
+      p.age || '',
+      p.gender || '',
+      p.dept || '',
+      p.op || '',
+      p.anes || '',
+      (p.selfpay || []).join('；'),
+      (p.reminders || []).join('；'),
+      buildHxList(p).join('；'),
+      buildDataList(p).join('；'),
+      (p.memo || '').replace(/\r?\n/g, ' '),
+      p.status || ''
+    ].map(csvCell).join(',');
+    csv += row + '\n';
+  });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'OP_checklist_' + todayStr() + '.csv';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+window.switchPage = switchPage;
+window.exportCSV = exportCSV;
+window.resetAll = resetAll;
+window.submitPatient = submitPatient;
+window.cancelEdit = cancelEdit;
+window.closeRoomChange = closeRoomChange;
+window.renderBoard = renderBoard;
+
+checkAndPurgeStaleData();
+renderGroupBar();
+initInputPage();
+scheduleNightlyPurge();
+</script>
+</body>
+</html>

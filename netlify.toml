@@ -13,3 +13,16 @@
   to = "/麻醉備物溝通看板.html"
   status = 200
   force = true
+
+# 麻醉 OP Checklist（個人記錄、純本機，與備物看板區分）
+[[redirects]]
+  from = "/checklist"
+  to = "/OP checklist/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/checklist/"
+  to = "/OP checklist/index.html"
+  status = 200
+  force = true
