@@ -84,6 +84,10 @@
     .room-title { font-size: 22px; font-weight: 900; color: var(--ink); border-left: 6px solid var(--ink-soft); padding-left: 12px; margin-bottom: 12px; }
     .room-title .count { font-size: 14px; font-weight: 600; color: var(--ink-2); margin-left: 8px; }
 
+    /* 同一手術室 case 橫向排列、可左右拉 */
+    .room-cases { display: flex; gap: 12px; overflow-x: auto; align-items: flex-start; padding-bottom: 8px; -webkit-overflow-scrolling: touch; scroll-snap-type: x proximity; }
+    .room-cases .case-card { flex: 0 0 280px; width: 280px; scroll-snap-align: start; }
+
     .case-card { background: white; border: 1.5px solid var(--line); border-radius: 10px; padding: 12px; margin-bottom: 10px; }
     .case-card:last-child { margin-bottom: 0; }
     .case-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
@@ -694,7 +698,10 @@ function renderBoard() {
     tCount.textContent = '（' + cases.length + ' case）';
     title.appendChild(tCount);
     block.appendChild(title);
-    cases.forEach(c => block.appendChild(renderCase(c)));
+    const lane = document.createElement('div');
+    lane.className = 'room-cases';
+    cases.forEach(c => lane.appendChild(renderCase(c)));
+    block.appendChild(lane);
     container.appendChild(block);
   });
 }
