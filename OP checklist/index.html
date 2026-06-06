@@ -6,6 +6,14 @@
   <meta name="google" content="notranslate">
   <meta http-equiv="Content-Language" content="zh-TW">
   <title>麻醉 OP Checklist 記錄</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/OP%20checklist/icons/favicon-32.png">
+  <link rel="apple-touch-icon" href="/OP%20checklist/icons/apple-touch-icon.png">
+  <link rel="manifest" href="/OP%20checklist/manifest.webmanifest">
+  <meta name="theme-color" content="#1e3a5f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="OP Checklist">
   <style>
     :root {
       --bg: #f4f6f9;
@@ -317,9 +325,6 @@ function initInputPage() {
     <div class="section-title">麻醉方式</div>
     <div class="btn-group" id="field-anes"></div>
 
-    <div class="section-title">自費</div>
-    <div class="btn-group" id="field-selfpay"></div>
-
     <div class="section-title">特殊提醒</div>
     <div class="btn-group" id="field-reminder"></div>
 
@@ -330,6 +335,9 @@ function initInputPage() {
     <div class="section-title">Data（異常指標）</div>
     <div class="btn-group" id="field-data"></div>
     <input type="text" id="data-other" class="text-input other-input" placeholder="✎ 其他數據（自填）" maxlength="60" style="display:none; margin-top:6px;">
+
+    <div class="section-title">自費</div>
+    <div class="btn-group" id="field-selfpay"></div>
 
     <div class="section-title">備註（最多 80 字）</div>
     <input type="text" id="memo-input" class="text-input memo-input" placeholder="請勿輸入全名、病歷號或完整病歷內容" maxlength="80">
@@ -727,13 +735,6 @@ function renderCase(p) {
     card.appendChild(jump);
   }
 
-  if (p.selfpay && p.selfpay.length) {
-    const sp = document.createElement('div');
-    sp.className = 'selfpay-block';
-    sp.textContent = '💲 自費：' + p.selfpay.join('、');
-    card.appendChild(sp);
-  }
-
   if (p.reminders && p.reminders.length) {
     const r = document.createElement('div');
     r.className = 'reminders';
@@ -750,46 +751,25 @@ function renderCase(p) {
   }
 
   const hxList = buildHxList(p);
+  if (hxList.length) {
+    const d = document.createElement('div');
+    d.className = 'hxdata-detail';
+    d.textContent = 'Hx：' + hxList.join('、');
+    card.appendChild(d);
+  }
   const dataList = buildDataList(p);
-  if (hxList.length || dataList.length) {
-    const row = document.createElement('div');
-    row.className = 'hxdata';
-    if (hxList.length) {
-      const pill = document.createElement('button');
-      pill.type = 'button';
-      pill.className = 'hxdata-pill' + (expandedHx.has(p.id) ? ' open' : '');
-      pill.textContent = (expandedHx.has(p.id) ? '▾' : '▸') + ' Hx (' + hxList.length + ')';
-      pill.onclick = () => {
-        if (expandedHx.has(p.id)) expandedHx.delete(p.id); else expandedHx.add(p.id);
-        renderBoard();
-      };
-      row.appendChild(pill);
-    }
-    if (dataList.length) {
-      const pill = document.createElement('button');
-      pill.type = 'button';
-      pill.className = 'hxdata-pill' + (expandedData.has(p.id) ? ' open' : '');
-      pill.textContent = (expandedData.has(p.id) ? '▾' : '▸') + ' Data (' + dataList.length + ')';
-      pill.onclick = () => {
-        if (expandedData.has(p.id)) expandedData.delete(p.id); else expandedData.add(p.id);
-        renderBoard();
-      };
-      row.appendChild(pill);
-    }
-    card.appendChild(row);
+  if (dataList.length) {
+    const d = document.createElement('div');
+    d.className = 'hxdata-detail';
+    d.textContent = 'Data：' + dataList.join('、');
+    card.appendChild(d);
+  }
 
-    if (expandedHx.has(p.id) && hxList.length) {
-      const d = document.createElement('div');
-      d.className = 'hxdata-detail';
-      d.textContent = 'Hx：' + hxList.join('、');
-      card.appendChild(d);
-    }
-    if (expandedData.has(p.id) && dataList.length) {
-      const d = document.createElement('div');
-      d.className = 'hxdata-detail';
-      d.textContent = 'Data：' + dataList.join('、');
-      card.appendChild(d);
-    }
+  if (p.selfpay && p.selfpay.length) {
+    const sp = document.createElement('div');
+    sp.className = 'selfpay-block';
+    sp.textContent = '💲 自費：' + p.selfpay.join('、');
+    card.appendChild(sp);
   }
 
   if (p.memo) {
